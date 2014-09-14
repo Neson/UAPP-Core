@@ -1,6 +1,7 @@
 class SiteNavigation < ActiveRecord::Base
   scope :scope_nav, -> { where('show_in_navigation = ?', true).order('priority ASC') }
   scope :scope_menu, -> { where('show_in_menu = ?', true).order('priority ASC') }
+  scope :output_data, -> { select([:name, :url, :icon, :description, :color, :priority, :enabled, :cross_domin]).to_a.map { |hash| hash.attributes.select { |k, v| k != 'id' } } }
 
   after_save :update_cache
 
@@ -14,13 +15,12 @@ class SiteNavigation < ActiveRecord::Base
     Rails.cache.read("site_navigation_menu")
   end
 
-  def update_cache
-    Rails.cache.write("site_navigation_nav", SiteNavigation.scope_nav.to_a.map { |hash| hash.attributes.select { |k, v| ['name', 'url', 'icon', 'description', 'color', 'priority', 'enabled', 'cross_domin'].include? k } })
-    Rails.cache.write("site_navigation_menu", SiteNavigation.scope_menu.to_a.map { |hash| hash.attributes.select { |k, v| ['name', 'url', 'icon', 'description', 'color', 'priority', 'enabled', 'cross_domin'].include? k } })
+  def self.update_cache
+    Rails.cache.write("site_navigation_nav", SiteNavigation.scope_nav.output_data)
+    Rails.cache.write("site_navigation_menu", SiteNavigation.scope_menu.output_data)
   end
 
-  def self.update_cache
-    Rails.cache.write("site_navigation_nav", SiteNavigation.scope_nav.to_a.map { |hash| hash.attributes.select { |k, v| ['name', 'url', 'icon', 'description', 'color', 'priority', 'enabled', 'cross_domin'].include? k } })
-    Rails.cache.write("site_navigation_menu", SiteNavigation.scope_menu.to_a.map { |hash| hash.attributes.select { |k, v| ['name', 'url', 'icon', 'description', 'color', 'priority', 'enabled', 'cross_domin'].include? k } })
+  def update_cache
+    SiteNavigation.update_cache
   end
 end
