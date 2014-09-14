@@ -36,6 +36,12 @@ class User < ActiveRecord::Base
     department && department.name
   end
 
+  def write_login_token_to_cookie(cookies)
+    t = Time.now.to_i.to_s
+    cookies[:login_token_gtime] = { value: t, domain: '.' + Setting.app_domain }
+    cookies[:login_token] = { value: Digest::MD5.hexdigest(Setting.site_secret_key + t + self.id.to_s), domain: '.' + Setting.app_domain }
+  end
+
   def self.from_facebook(auth)
     user = where({:fbid => auth.uid}).first_or_create! do |user|
       user.email = "#{Devise.friendly_token[0,20]}@dev.null"
