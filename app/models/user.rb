@@ -45,19 +45,19 @@ class User < ActiveRecord::Base
   end
 
   def self.from_facebook(auth)
+    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
+    info = JSON.parse(get_info_connection.parsed_response)
+
     user = where({:fbid => auth.uid}).first_or_create! do |user|
       user.email = "#{Devise.friendly_token[0,20]}@dev.null"
       user.password = Devise.friendly_token[0,20]
       user.name = auth.info.name
       user.gender = auth.extra.raw_info.gender
-      get_info_connection = HTTParty.get("https://graph.facebook.com/me?access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
       name = JSON.parse(get_info_connection.parsed_response)['name']
       user.name = name if name
     end
 
     user.fbtoken = auth.credentials.token
-    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
-    info = JSON.parse(get_info_connection.parsed_response)
     user.fblink = info['link']
     user.fbcover = info['cover'] && info['cover']['source']
     user.avatar = info['picture'] && info['picture']['data'] && info['picture']['data']['url']
