@@ -49,7 +49,7 @@
   email_regexp_s = "#{Setting.email_regexp_s.gsub('\\', '\\\\\\')}"
   email_regexp = new RegExp(email_regexp_s)
   email_analysis_regexp_s = "#{Setting.email_analysis_regexp_s.gsub('\\', '\\\\\\')}"
-  email_ending = "#{regexp_parse(Setting.email_regexp_s)}"
+  email_ending = "#{(Setting.email_regexp_s.match(/\*/)) ? '' : regexp_parse(Setting.email_regexp_s)}"
   function checkForm() {
     if ($('.email').val().match(email_regexp)) {
       return true;
@@ -68,7 +68,7 @@
     if $('.email').val().match(email_regexp)
       $('.email-c').removeClass 'error'
     # console.log e
-    if $email.val().match(/@$/)
+    if $email.val().match(/@$/) && email_ending != ''
       $email.val $email.val().replace(/@$/, email_ending)
       $email.caretTo('@', true);
       auto_complete_fired = true

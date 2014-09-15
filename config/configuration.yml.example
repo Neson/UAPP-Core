@@ -52,5 +52,5 @@ development:
   facebook_app_secret: 'facebook_app_secret_here'
   google_analytics_id: 'google_analytics_id_here'
   newrelic_license_key: 'newrelic_license_key_here'
-  email_regexp_s: '^.*@.*$'
+  email_regexp_s: '.+@.*$'
   email_analysis_regexp_s: '^(?<id>.*)@.*$'
