@@ -17,15 +17,21 @@ class MeController < ApplicationController
       faild = true
     end
 
-    if params['commit'] == "confirm_mobile" || (params['mobile_confirm_token'] != '' && params['mobile_confirm_token'] != nil)
-      confirm_mobile(params['mobile_confirm_token'])
-    elsif params['commit'] == "reconfirm_mobile"
-      send_confirmation_sms
-    elsif params[:mobile] && params[:mobile] != @user.mobile && params[:mobile] != @user.unconfirmed_mobile
-      current_user.unconfirmed_mobile = params[:mobile].tr('^0-9', '').gsub(/^09/, '8869')
-      current_user.mobile = nil
-      current_user.save
-      send_confirmation_sms
+    ActiveRecord::Base.transaction do
+      if params['commit'] == "confirm_mobile" || (params['mobile_confirm_token'] != '' && params['mobile_confirm_token'] != nil)
+        confirm_mobile(params['mobile_confirm_token'])
+      elsif params['commit'] == "reconfirm_mobile"
+        send_confirmation_sms
+      elsif params[:mobile].to_s != '' && params[:mobile] != @user.mobile && params[:mobile] != @user.unconfirmed_mobile
+        current_user.unconfirmed_mobile = params[:mobile].tr('^0-9', '').gsub(/^09/, '8869').gsub(/^88609/, '8869')
+        current_user.mobile = nil
+        current_user.save
+        send_confirmation_sms
+      elsif params[:mobile].to_s == ''
+        current_user.mobile = nil
+        current_user.unconfirmed_mobile = nil
+        current_user.save
+      end
     end
 
     if faild
@@ -69,7 +75,7 @@ class MeController < ApplicationController
   end
 
   def my_params
-    params.require(:user).permit(:name, :gender, :department_id, :birthday, :address, :brief)
+    params.require(:user).permit(:name, :gender, :department_code, :birthday, :address, :brief)
   end
 
   def send_confirmation_sms

@@ -27,6 +27,17 @@ ActiveAdmin.register Doorkeeper::Application do
       data = OauthApplicationData.get(app.id)
       link_to data.sms_quota, (admin_oauth_application_data_path() + '/' + data.id.to_s)
     end
+    column :rfid do |app|
+      if app.owner_type != 'Admin'
+        if app.data.allow_use_of_user_rfid
+          status_tag('Yes', :class => 'yes')
+        else
+          status_tag('No', :class => 'no')
+        end
+      else
+        status_tag('(Admin)', :class => 'yes')
+      end
+    end
     actions
   end
 

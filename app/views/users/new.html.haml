@@ -17,6 +17,7 @@
           .ui.corner.label
           .ui.red.pointing.above.ui.label.error-label 不合法的 email，請確認你輸入的是正確的學校 email！
         = f.submit '寄驗證信', :class => "ui green submit button"
+        = # f.submit '我是訪客', :class => "ui frameless button", :data => { :confirm => "確定登記為訪客？訪客的部分功能會受到限制，登入後可由「個人資料」重新認證為#{Setting.org_name}成員。" }
         .ui.three.column.doubling.grid
           .column
             .small 入學年度
@@ -43,7 +44,7 @@
 
 :javascript
   identities = [{"code":"b","name":"大學生"}, {"code":"m","name":"碩士生"}, {"code":"d","name":"博士生"}];
-  departments = #{Department.all.select("code, name, college_id").to_json};
+  departments = #{Department.all.select("code, name, college_code").to_json};
   colleges = #{College.all.select("code, name, id").to_json};
   email_regexp_s = "#{Setting.email_regexp_s.gsub('\\', '\\\\\\')}"
   email_regexp = new RegExp(email_regexp_s)
@@ -99,12 +100,12 @@
       )[0]
       # console.log identity
       department = departments.filter((d) ->
-        String(d.code) is String(matchData[0].admission_department_id)
+        String(d.code) is String(matchData[0].admission_department_code)
       )[0]
       # console.log department
       if department
         college = colleges.filter((c) ->
-          c.id is parseInt(department.college_id)
+          c.id is parseInt(department.college_code)
         )[0]
         # console.log college
 

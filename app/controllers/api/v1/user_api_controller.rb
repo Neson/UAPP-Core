@@ -1,4 +1,5 @@
 class Api::V1::UserApiController < ApplicationController
+  before_action :find_app
   before_action :check_permissions, only: [:user_data, :send_sms]
   respond_to     :json
   protect_from_forgery
@@ -19,14 +20,14 @@ class Api::V1::UserApiController < ApplicationController
     if !User.where('id = ?', params['id']).first
       render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
     else
-      a = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-      t = a.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if is_admin?
+
+      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
+      if @is_admin
         scopes = ['admin']
       else
         scopes = t.scopes
       end
-        render json: User.find(params['id'].tr('^0-9', '')).api_get_data(scopes, is_admin?)
+        render json: User.find(params['id'].tr('^0-9', '')).api_get_data(scopes, @is_admin)
     end
   end
 
@@ -93,15 +94,49 @@ class Api::V1::UserApiController < ApplicationController
     if !User.where('id = ?', params['id']).first
       render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
     else
-      a = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-      t = a.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if is_admin?
+
+      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
+      if @is_admin
         scopes = ['admin']
       else
         scopes = t.scopes
       end
-      respond = User.find(params['id'].tr('^0-9', '')).api_send_sms(params['message'], a.id, scopes, is_admin?)
+      respond = User.find(params['id'].tr('^0-9', '')).api_send_sms(params['message'], @app.id, scopes, @is_admin)
       render json: respond, status: respond[:status]
+    end
+  end
+
+
+  swagger_api :rfid_scan do
+    summary "RFID 查找使用者"
+    notes "以 (學生證) RFID tag ID 查找使用者。僅限 admin 與特別授權的應用程式使用。"
+    param :query, :application_id, :string, :required, "應用程式 ID"
+    param :query, :secret, :string, :required, "應用程式密鑰"
+    param :path, :id, :integer, :required, "RFID tag ID"
+    response :not_found
+    response :unauthorized
+  end
+
+  def rfid_scan
+    if @app.data.allow_use_of_user_rfid || @is_admin
+      rfid_data = UserRfidData.find_by_code(params[:id])
+      if !!rfid_data
+        user = UserRfidData.find_by_code(params[:id]).user
+        if !!user
+          render json: user.api_get_data(['public', 'school'], false)
+        else
+          render json: { sid: rfid_data.sid, student_id: rfid_data.sid }
+        end
+        # if @is_admin
+        #   render json: user, status: 200
+        # else
+        #   render json: user.select { |k, v| ['id', 'name'].include? k }, status: 200
+        # end
+      else
+        render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
+      end
+    else
+      render json: {:error => {:message => "Not authorized", :code => 401}, :status => 401}, status: 401
     end
   end
 
@@ -111,33 +146,33 @@ class Api::V1::UserApiController < ApplicationController
     notes "僅供 admin 使用。"
     param :query, :application_id, :string, :required, "應用程式 ID"
     param :query, :secret, :string, :required, "應用程式密鑰"
-    param :path, :admission_year, :string, :required, "入學年，數字或 all"
-    # param :path, :college_id, :string, :required, "學院 ID，數字或 all"
-    param :path, :department_id, :string, :required, "系所 CODE，數字或 all"
+    param :path, :admission_year, :string, :required, "入學年，數字或 'all'"
+    # param :path, :college_code, :string, :required, "學院 CODE，或 'all'"
+    param :path, :department_code, :string, :required, "系所 CODE，或 'all'"
     response :unauthorized
     response :not_found, 'Not Found 沒有此使用者'
   end
 
   def list_users
-    if is_admin?
+    if @is_admin
       begin
-        # if params[:college_id] == 'all'
-          if params[:department_id] == 'all'
+        # if params[:college_code] == 'all'
+          if params[:department_code] == 'all'
             users = User
           else
-            users = Department.where("code = ?", params[:department_id]).first.students
+            users = Department.where("code = ?", params[:department_code]).first.students
           end
         # else
-        #   if params[:department_id] == 'all'
-        #     users = College.where("id = ?", params[:college_id]).first.students
+        #   if params[:department_code] == 'all'
+        #     users = College.where("code = ?", params[:college_code]).first.students
         #   else
-        #     users = College.where("id = ?", params[:college_id]).first.departments.where("code = ?", params[:department_id]).first.students
+        #     users = College.where("code = ?", params[:college_code]).first.departments.where("code = ?", params[:department_code]).first.students
         #   end
         # end
         if params[:admission_year] == 'all'
-          result = users.confirmed.all.select(:id, :name, :email, :admission_year, :department_id)
+          result = users.confirmed.all.select(:id, :name, :email, :admission_year, :department_code)
         else
-          result = users.confirmed.where("admission_year = ?", params[:admission_year]).all.select(:id, :name, :email, :admission_year, :department_id)
+          result = users.confirmed.where("admission_year = ?", params[:admission_year]).all.select(:id, :name, :email, :admission_year, :department_code)
         end
         render json: result
       rescue
@@ -162,7 +197,7 @@ class Api::V1::UserApiController < ApplicationController
   end
 
   def find_user
-    if is_admin?
+    if @is_admin
       begin
         if params[:fbid].to_s != ''
           result = User.confirmed.where(fbid: params[:fbid]).all
@@ -191,17 +226,33 @@ class Api::V1::UserApiController < ApplicationController
     User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
   end
 
+  def find_app
+    if (params['application_id'].to_s == '' || params['secret'].to_s == '')
+      render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
+      return false
+    end
+    @app = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
+    if !@app
+      render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
+      return false
+    end
+    @is_admin = false
+    if @app.admin_app?
+      @is_admin = true
+    end
+  end
+
   def check_permissions
     if (params['application_id'].to_s == '' || params['secret'].to_s == '')
       render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
       return false
     end
-    a = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-    if a
-      t = a.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
+
+    if @app
+      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
       if t && !t.revoked_at && t.scopes.include?('offline_access')
         return true
-      elsif is_admin?
+      elsif @is_admin
         return true
       else
         render json: {:error => {:message => "Not authorized", :code => 401}, :status => 401}, status: 401
@@ -211,16 +262,5 @@ class Api::V1::UserApiController < ApplicationController
       render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
       return false
     end
-  end
-
-  def is_admin?
-    admin = false
-    a = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-    if a
-      if a.admin_app?
-        admin = true
-      end
-    end
-    admin
   end
 end

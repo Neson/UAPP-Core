@@ -586,3 +586,7 @@ body > .wrapper > .footer {
 		@include opacity(.5);
 	}
 }
+
+.hide {
+	display: none;
+}

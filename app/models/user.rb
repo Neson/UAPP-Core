@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   devise :omniauthable, :omniauth_providers => [:facebook]
   validates_uniqueness_of :fbid
   validates :name, :gender, :presence => true
+  validates_inclusion_of :identity, :in => ["bachelor", "master", "doctor", "professor", "staff", "other", "guest"]
+  validates_inclusion_of :gender, :in => ["male", "female", "other"]
   scope :confirmed, -> { where("confirmed_at IS NOT NULL") }
   scope :unconfirmed, -> { where("confirmed_at IS NULL") }
 
@@ -14,8 +16,8 @@ class User < ActiveRecord::Base
   has_many :friends, through: :friendships
 
   has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner
-  belongs_to :department, primary_key: "code"
-  belongs_to :admission_department, class_name: "Department", primary_key: "code"
+  belongs_to :department, primary_key: "code", foreign_key: "department_code"
+  belongs_to :admission_department, class_name: "Department", primary_key: "code", foreign_key: "admission_department_code"
 
   def avatar(size=100)
     'https://graph.facebook.com/' + fbid.to_s + '/picture?width=' + size.to_s + '&height=' + size.to_s
@@ -49,20 +51,26 @@ class User < ActiveRecord::Base
     self.notifications.new({title: title, type: type, content: content, url: url, image: image, sender_application_id: sender_application_id, priority: priority, importance: importance, sender: sender, sender_url: sender_url, icon: icon, event_name: event_name, datetime: datetime, location: location}).save!
   end
 
+  def write_login_token_to_cookie(cookies)
+    t = Time.now.to_i.to_s
+    cookies[:login_token_gtime] = { value: t, domain: '.' + Setting.app_domain }
+    cookies[:login_token] = { value: Digest::MD5.hexdigest(Setting.site_secret_key + t + self.id.to_s), domain: '.' + Setting.app_domain }
+  end
+
   def self.from_facebook(auth)
+    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
+    info = JSON.parse(get_info_connection.parsed_response)
+
     user = where({:fbid => auth.uid}).first_or_create! do |user|
       user.email = "#{Devise.friendly_token[0,20]}@dev.null"
       user.password = Devise.friendly_token[0,20]
       user.name = auth.info.name
       user.gender = auth.extra.raw_info.gender
-      get_info_connection = HTTParty.get("https://graph.facebook.com/me?access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
       name = JSON.parse(get_info_connection.parsed_response)['name']
       user.name = name if name
     end
 
     user.fbtoken = auth.credentials.token
-    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
-    info = JSON.parse(get_info_connection.parsed_response)
     user.fblink = info['link']
     user.fbcover = info['cover'] && info['cover']['source']
     user.avatar = info['picture'] && info['picture']['data'] && info['picture']['data']['url']
@@ -96,11 +104,12 @@ class User < ActiveRecord::Base
       userdata['mobile_verified'] = false
     end
     if scopes.include?('school') || admin
+      userdata['sid'] = self.student_id
       userdata['student_id'] = self.student_id
       userdata['identity'] = self.identity
       userdata['admission_year'] = self.admission_year
-      userdata['admission_department_code'] = self.admission_department_id
-      userdata['department_code'] = self.department_id
+      userdata['admission_department_code'] = self.admission_department_code
+      userdata['department_code'] = self.department_code
       userdata['college'] = self.department && self.department.college && self.department.college.name
       userdata['admission_department'] = self.admission_department && self.admission_department.name
       userdata['department'] = self.department && self.department.name
@@ -111,7 +120,7 @@ class User < ActiveRecord::Base
     end
     if scopes.include?('friends') || admin
       if admin
-        userdata['friends'] = self.friends.select(:id, :name, :mobile, :email, :fbid, :gender, :student_id, :identity, :admission_year, :admission_department_id, :department_id, :fblink, :fbcover).map { |f| {id: f[:id], uid: f[:id], name: f[:name], email: f[:email], fbid: f[:fbid], gender: f[:gender], student_id: f[:student_id], identity: f[:identity], admission_year: f[:admission_year], admission_department_id: f[:admission_department_id], department_id: f[:department_id], fblink: f[:fblink], fbcover: f[:fbcover], mobile_verified: f.mobile? } }
+        userdata['friends'] = self.friends.select(:id, :name, :mobile, :email, :fbid, :gender, :student_id, :identity, :admission_year, :admission_department_code, :department_code, :fblink, :fbcover).map { |f| {id: f[:id], uid: f[:id], name: f[:name], email: f[:email], fbid: f[:fbid], gender: f[:gender], student_id: f[:student_id], identity: f[:identity], admission_year: f[:admission_year], admission_department_code: f[:admission_department_code], department_code: f[:department_code], fblink: f[:fblink], fbcover: f[:fbcover], mobile_verified: f.mobile? } }
       else
         userdata['friends'] = self.friends.select(:id, :name, :mobile).map { |f| {id: f[:id], uid: f[:id], name: f[:name], mobile_verified: f.mobile? } }
       end

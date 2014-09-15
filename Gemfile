@@ -66,7 +66,10 @@ gem 'simple_form', '~> 3.0.2'
 gem 'seo_helper', '~> 1.0.2'
 gem 'open_graph_helper', '~> 0.2.0'
 
+gem 'activerecord-import', '~> 0.5.0'
+
 gem 'activeadmin', github: 'gregbell/active_admin', ref: '7317949556476c3d67b0a8a950f7ef4e33ddf709'
+gem 'active_admin_import' , '~> 2.1.1'
 gem 'polyamorous', github: 'activerecord-hackery/polyamorous'
 gem 'ransack', github: 'activerecord-hackery/ransack'
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140910044537) do
+ActiveRecord::Schema.define(version: 20140910223947) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -65,7 +65,7 @@ ActiveRecord::Schema.define(version: 20140910044537) do
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "college_id"
+    t.string   "college_code"
   end
 
   create_table "notifications", force: true do |t|
@@ -120,9 +120,10 @@ ActiveRecord::Schema.define(version: 20140910044537) do
 
   create_table "oauth_application_data", force: true do |t|
     t.integer  "application_id"
-    t.integer  "sms_quota",      default: 0, null: false
+    t.integer  "sms_quota",              default: 0,     null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "allow_use_of_user_rfid", default: false, null: false
   end
 
   create_table "oauth_applications", force: true do |t|
@@ -138,16 +139,6 @@ ActiveRecord::Schema.define(version: 20140910044537) do
 
   add_index "oauth_applications", ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type", using: :btree
   add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
-
-  create_table "sessions", force: true do |t|
-    t.string   "session_id", null: false
-    t.text     "data"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "sessions", ["session_id"], name: "index_sessions_on_session_id", unique: true, using: :btree
-  add_index "sessions", ["updated_at"], name: "index_sessions_on_updated_at", using: :btree
 
   create_table "settings", force: true do |t|
     t.string   "var",                   null: false
@@ -182,6 +173,16 @@ ActiveRecord::Schema.define(version: 20140910044537) do
     t.datetime "updated_at"
   end
 
+  create_table "user_rfid_data", force: true do |t|
+    t.string   "sid",            null: false
+    t.string   "encrypted_code", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "user_rfid_data", ["encrypted_code"], name: "index_user_rfid_data_on_encrypted_code", unique: true, using: :btree
+  add_index "user_rfid_data", ["sid"], name: "index_user_rfid_data_on_sid", unique: true, using: :btree
+
   create_table "users", force: true do |t|
     t.string   "email",                       default: "",    null: false
     t.string   "encrypted_password",          default: "",    null: false
@@ -206,8 +207,8 @@ ActiveRecord::Schema.define(version: 20140910044537) do
     t.string   "student_id"
     t.string   "identity"
     t.integer  "admission_year"
-    t.integer  "admission_department_id"
-    t.integer  "department_id"
+    t.string   "admission_department_code"
+    t.string   "department_code"
     t.string   "mobile"
     t.string   "unconfirmed_mobile"
     t.date     "birthday"

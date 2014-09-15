@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
 
   def new
-    if session["devise.new_user_time"] > 600.seconds.ago && session["devise.new_user_id"]
+    if session["devise.new_user_time"] && session["devise.new_user_time"] > 600.seconds.ago && session["devise.new_user_id"]
       if @user = User.where(confirmed_at: nil, id: session["devise.new_user_id"]).first
         @user.email = @user.unconfirmed_email if @user.email =~ /@dev\.null$/
       else
@@ -45,14 +45,14 @@ class UsersController < ApplicationController
             identities = { b: 'bachelor', m: 'master', d: 'doctor' }
             @user.identity = identities[data[:identity_id].to_sym]
             @user.admission_year = data[:admission_year].to_i
-            @user.admission_department_id = data[:admission_department_id].to_i
-            @user.department_id = data[:admission_department_id].to_i
+            @user.admission_department_code = data[:admission_department_code].to_s
+            @user.department_code = data[:admission_department_code].to_s
             @user.student_id = data[:student_id]
           else
             @user.identity = 'other'
             @user.admission_year = nil
-            @user.admission_department_id = nil
-            @user.department_id = nil
+            @user.admission_department_code = nil
+            @user.department_code = nil
             @user.student_id = nil
           end
             @user.save

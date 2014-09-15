@@ -1,7 +1,7 @@
 ActiveAdmin.register User do
   menu priority: 10
 
-  permit_params :admin, :name, :email, :fbid, :gender, :identity, :student_id, :admission_year, :admission_department_id, :department_id, :mobile, :birthday, :address, :brief
+  permit_params :admin, :name, :email, :fbid, :gender, :identity, :student_id, :admission_year, :admission_department_code, :department_code, :mobile, :birthday, :address, :brief
 
   index do
     selectable_column
@@ -66,12 +66,12 @@ ActiveAdmin.register User do
       f.input :name
       f.input :email
       f.input :fbid
-      f.input :gender
-      f.input :identity
+      f.input :gender, :as => :select, :collection => options_for_select([['male', 'male'], ['female', 'female']], user.gender)
+      f.input :identity, :as => :select, :collection => options_for_select([[t('bachelor'), 'bachelor'], [t('master'), 'master'], [t('doctor'), 'doctor'], [t('professor'), 'professor'], [t('staff'), 'staff'], [t('other'), 'other'], [t('guest'), 'guest']], user.identity)
       f.input :student_id
       f.input :admission_year
-      f.input :admission_department_id
-      f.input :department_id
+      f.input :admission_department_code, :as => :select, :collection => option_groups_from_collection_for_select(College.all, :departments, :name, :code, :name, user.admission_department_code)
+      f.input :department_code, :as => :select, :collection => option_groups_from_collection_for_select(College.all, :departments, :name, :code, :name, user.department_code)
       f.input :mobile
       f.input :birthday
       f.input :address
