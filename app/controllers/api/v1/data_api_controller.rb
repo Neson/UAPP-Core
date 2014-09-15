@@ -10,7 +10,7 @@ class Api::V1::DataApiController < ApplicationController
   end
 
   def colleges
-    render json: College.all.select('code', 'name').map { |hash| hash.attributes.select { |k, v| ['code', 'name'].include? k } }
+    render json: College.get_data
   end
 
   swagger_api :departments do
@@ -19,7 +19,7 @@ class Api::V1::DataApiController < ApplicationController
   end
 
   def departments
-    render json: Department.all.select('code', 'name').map { |hash| hash.attributes.select { |k, v| ['code', 'name'].include? k } }
+    render json: Department.get_data
   end
 
   swagger_api :site_data do
@@ -30,29 +30,15 @@ class Api::V1::DataApiController < ApplicationController
   def site_data
     data = {}
 
-    data['site_name'] = Setting.site_name
-    data['site_domain'] = Setting.app_domain
-    data['site_url'] = Setting.app_url
-    data['org_name'] = Setting.org_name
-    data['administrator_url'] = Setting.administrator_url
-    data['administrator_email'] = Setting.administrator_email
-    data['mailer_sender'] = Setting.mailer_sender
-    data['google_analytics_id'] = Setting.google_analytics_id
+    data.merge! Hash[Setting.select_by_keys(select_settings).map { |k, v| [k.gsub('app', 'site'), v] }]
 
-    data['fb_page'] = Preference['fb_page']
-
-    data['site_announcement'] = Preference['announcement']
+    data.merge! Hash[Preference.get_all.select_by_keys(select_preferences).map { |k, v| [k.gsub('app', 'site'), v] }]
 
     data['site_navigation'] = SiteNavigation.nav
     data['site_menu'] = SiteNavigation.menu
-    data['page_footer'] = Preference['page_footer']
 
-    data['maintenance_mode'] = Preference['maintenance_mode']
-
-    data['site_logo'] = Preference['app_logo']
-
-    data['colleges_data'] = College.all.select('code', 'name').map { |hash| hash.attributes.select { |k, v| ['code', 'name'].include? k } }
-    data['departments_data'] = Department.all.select('code', 'name').map { |hash| hash.attributes.select { |k, v| ['code', 'name'].include? k } }
+    data['colleges_data'] = College.get_data
+    data['departments_data'] = Department.get_data
 
     render json: data
   end
@@ -73,5 +59,34 @@ class Api::V1::DataApiController < ApplicationController
 
   def site_menu
     render json: SiteNavigation.menu
+  end
+
+  private
+
+  def select_settings
+    [
+      'site_name',
+      'app_domain',
+      'app_url',
+      'org_name',
+      'administrator_url',
+      'administrator_email',
+      'mailer_sender',
+      'google_analytics_id',
+    ]
+  end
+
+  def select_preferences
+    [
+      'app_logo',
+      'page_footer',
+      'fb_page',
+      'site_announcement',
+      'maintenance_mode',
+      'administrator_url',
+      'administrator_email',
+      'mailer_sender',
+      'google_analytics_id',
+    ]
   end
 end

@@ -7,6 +7,16 @@ class Notification < ActiveRecord::Base
 
   before_create :set_data
 
+  def self.get_latest(page=1, limit=50, show_dismissed=false)
+    page -= 1 if page > 0
+    offset = page * limit
+    if show_dismissed
+      limit(limit).offset(offset).order('created_at DESC')
+    else
+      where(dismissed: false).limit(limit).offset(offset).order('created_at DESC')
+    end
+  end
+
   def set_data
     if self.sender_application_id.to_s != ''
       application = Doorkeeper::Application.includes(:data).where(id: sender_application_id).first

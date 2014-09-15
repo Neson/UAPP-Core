@@ -42,7 +42,7 @@ module ApplicationHelper
   end
 
   def site_announcement
-    Preference['announcement'] && markdown_format(Preference['announcement']).gsub(/\<\/?p\>/, '').html_safe
+    Preference['site_announcement'] && markdown_format(Preference['site_announcement']).gsub(/\<\/?p\>/, '').html_safe
   end
 
   def apps_navigation

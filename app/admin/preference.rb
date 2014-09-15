@@ -18,8 +18,8 @@ ActiveAdmin.register_page "Preference" do
 
             li do
               label '全站公告 (支援 markdown 語法)'
-              f.textarea :name => "data[announcement]" do
-                Preference.announcement
+              f.textarea :name => "data[site_announcement]" do
+                Preference.site_announcement
               end
             end
 
