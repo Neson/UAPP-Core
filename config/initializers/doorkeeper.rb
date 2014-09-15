@@ -10,9 +10,7 @@ Doorkeeper.configure do
     # Example implementation:
     #   User.find_by_id(session[:user_id]) || redirect_to(new_user_session_url)
     if current_user
-      t = Time.now.to_i.to_s
-      cookies[:login_token_gtime] = { value: t, domain: '.' + Setting.app_domain }
-      cookies[:login_token] = { value: Digest::MD5.hexdigest(Setting.site_secret_key + t + current_user.id.to_s), domain: '.' + Setting.app_domain }
+      current_user.write_login_token_to_cookie(cookies)
     else
       cookies[:login_token] = { value: '', domain: '.' + Setting.app_domain }
     end

@@ -66,12 +66,12 @@ ActiveAdmin.register User do
       f.input :name
       f.input :email
       f.input :fbid
-      f.input :gender
-      f.input :identity
+      f.input :gender, :as => :select, :collection => options_for_select([['male', 'male'], ['female', 'female']], user.gender)
+      f.input :identity, :as => :select, :collection => options_for_select([[t('bachelor'), 'bachelor'], [t('master'), 'master'], [t('doctor'), 'doctor'], [t('professor'), 'professor'], [t('staff'), 'staff'], [t('other'), 'other'], [t('guest'), 'guest']], user.identity)
       f.input :student_id
       f.input :admission_year
-      f.input :admission_department_code
-      f.input :department_code
+      f.input :admission_department_code, :as => :select, :collection => option_groups_from_collection_for_select(College.all, :departments, :name, :code, :name, user.admission_department_code)
+      f.input :department_code, :as => :select, :collection => option_groups_from_collection_for_select(College.all, :departments, :name, :code, :name, user.department_code)
       f.input :mobile
       f.input :birthday
       f.input :address

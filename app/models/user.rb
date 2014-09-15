@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   devise :omniauthable, :omniauth_providers => [:facebook]
   validates_uniqueness_of :fbid
   validates :name, :gender, :presence => true
+  validates_inclusion_of :identity, :in => ["bachelor", "master", "doctor", "professor", "staff", "other", "guest"]
+  validates_inclusion_of :gender, :in => ["male", "female", "other"]
   scope :confirmed, -> { where("confirmed_at IS NOT NULL") }
   scope :unconfirmed, -> { where("confirmed_at IS NULL") }
 
@@ -36,20 +38,26 @@ class User < ActiveRecord::Base
     department && department.name
   end
 
+  def write_login_token_to_cookie(cookies)
+    t = Time.now.to_i.to_s
+    cookies[:login_token_gtime] = { value: t, domain: '.' + Setting.app_domain }
+    cookies[:login_token] = { value: Digest::MD5.hexdigest(Setting.site_secret_key + t + self.id.to_s), domain: '.' + Setting.app_domain }
+  end
+
   def self.from_facebook(auth)
+    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
+    info = JSON.parse(get_info_connection.parsed_response)
+
     user = where({:fbid => auth.uid}).first_or_create! do |user|
       user.email = "#{Devise.friendly_token[0,20]}@dev.null"
       user.password = Devise.friendly_token[0,20]
       user.name = auth.info.name
       user.gender = auth.extra.raw_info.gender
-      get_info_connection = HTTParty.get("https://graph.facebook.com/me?access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
       name = JSON.parse(get_info_connection.parsed_response)['name']
       user.name = name if name
     end
 
     user.fbtoken = auth.credentials.token
-    get_info_connection = HTTParty.get("https://graph.facebook.com/me?fields=id,name,friends,link,picture.height(500).width(500),cover,devices&access_token=#{auth.credentials.token}&locale=#{I18n.locale}")
-    info = JSON.parse(get_info_connection.parsed_response)
     user.fblink = info['link']
     user.fbcover = info['cover'] && info['cover']['source']
     user.avatar = info['picture'] && info['picture']['data'] && info['picture']['data']['url']

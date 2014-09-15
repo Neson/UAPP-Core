@@ -1,6 +1,6 @@
 /*
  * Usage exapmle:
- * 'b10132023@mail.ntust.edu.tw'.keyMatch('^(?<student_id>(?<identity_id>[bmd])(?<admission_year>\\d*)(?<admission_department_code>\\d{3})\\d{2})@mail\\.ntust\\.edu\\.tw$')
+ * 'b10132023@mail.ntust.edu.tw'.keyMatch('^(?<student_id>(?<identity_id>[bmd])(?<admission_year>\\d*)(?<admission_department_id>\\d{3})\\d{2})@mail\\.ntust\\.edu\\.tw$')
  *
  * The \ must be replaced as \\ in regex string.
  */

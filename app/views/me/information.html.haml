@@ -32,10 +32,10 @@
         .field
           %label 科系
           .select2
-            = f.select :department_code, Department.get_options, :autocomplete => :off
+            = f.select :department_code, option_groups_from_collection_for_select(College.all, :departments, :name, :code, :name, @user.department_code), :autocomplete => :off
       .ui.left.floated.header
         進階資料
-        %small 無論你的隱私設定為何，這裡的資料皆不會對外公開
+        %small 這裡的資料不會顯示在個人頁面上
       .two.fields.mobile
         .field
           %label 手機
