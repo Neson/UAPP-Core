@@ -4,7 +4,10 @@ zh-TW:
       bachelor: 大學生
       master: 碩士生
       doctor: 博士生
+      professor: 教師
+      staff: 職員
       other: 其他
+      guest: 校外訪客
   date:
     abbr_day_names:
     - 日

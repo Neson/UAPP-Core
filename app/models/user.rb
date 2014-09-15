@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   devise :omniauthable, :omniauth_providers => [:facebook]
   validates_uniqueness_of :fbid
   validates :name, :gender, :presence => true
+  validates_inclusion_of :identity, :in => ["bachelor", "master", "doctor", "professor", "staff", "other", "guest"]
+  validates_inclusion_of :gender, :in => ["male", "female", "other"]
   scope :confirmed, -> { where("confirmed_at IS NOT NULL") }
   scope :unconfirmed, -> { where("confirmed_at IS NULL") }
 

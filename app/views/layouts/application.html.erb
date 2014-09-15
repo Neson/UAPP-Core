@@ -8,7 +8,7 @@
     <%= render_page_description_meta_tag %>
     <%= render_page_keywords_meta_tag %>
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => true %>
-    <% if !current_user || !current_user.settings || !current_user.settings['display_not_fixed_top_bar'] %>
+    <% if @disable_fixed_top_bar != true && (!current_user || !current_user.settings || !current_user.settings['display_not_fixed_top_bar']) %>
       <%= stylesheet_link_tag 'fixed_top_bar', media: 'all', 'data-turbolinks-track' => true %>
     <% end %>
     <%= javascript_include_tag :modernizr %>
