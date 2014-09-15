@@ -46,8 +46,10 @@ class UsersController < ApplicationController
             identities = { b: 'bachelor', m: 'master', d: 'doctor' }
             @user.identity = data.has_key?(:identity_id) ? identities[data[:identity_id].to_sym] : 'other'
             @user.admission_year = data[:admission_year].to_i if data.has_key?(:admission_year)
-            @user.admission_department_code = data[:admission_department_code].to_s if data.has_key?(:admission_department_code)
-            @user.department_code = data[:admission_department_code].to_s if data.has_key?(:admission_department_code)
+            if data.has_key?(:admission_department_code) && !!Department.where(code: data[:admission_department_code].to_s).first
+              @user.admission_department_code = data[:admission_department_code].to_s
+              @user.department_code = data[:admission_department_code].to_s
+            end
             @user.student_id = data[:student_id] if data.has_key?(:student_id)
           else
             @user.identity = 'other'
