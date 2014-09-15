@@ -1,4 +1,5 @@
 class Notification < ActiveRecord::Base
+  self.inheritance_column = :_type_disabled
   validates :title, :presence => true
   validates_numericality_of :priority, :in => 0..3
   validates_numericality_of :importance, :in => 0..3

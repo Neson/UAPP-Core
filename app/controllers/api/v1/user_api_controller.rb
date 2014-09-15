@@ -1,10 +1,11 @@
 class Api::V1::UserApiController < ApplicationController
-  before_action :find_app
-  before_action :check_permissions, only: [:user_data, :send_sms]
+  include BasicUserApi
   respond_to     :json
   protect_from_forgery
 
   swagger_controller :user, "使用者存取相關 API"
+
+  before_action :authenticate
 
   swagger_api :user_data do
     summary "取得指定使用者資料"
@@ -16,20 +17,7 @@ class Api::V1::UserApiController < ApplicationController
     response :not_found, 'Not Found 沒有此使用者'
   end
 
-  def user_data
-    if !User.where('id = ?', params['id']).first
-      render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
-    else
-
-      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if @is_admin
-        scopes = ['admin']
-      else
-        scopes = t.scopes
-      end
-        render json: User.find(params['id'].tr('^0-9', '')).api_get_data(scopes, @is_admin)
-    end
-  end
+  # Defined in app/controllers/concerns/basic_user_api.rb
 
   swagger_api :send_notification do
     summary "傳送通知給指定使用者"
@@ -53,28 +41,7 @@ class Api::V1::UserApiController < ApplicationController
     response :unauthorized
   end
 
-  def send_notification
-    u = User.where('id = ?', params['id']).first
-    if u
-      a = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-      t = a.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if (t.scopes.include?('notification') && t.scopes.include?('offline_access')) || is_admin?  # 有發送權
-        respond = {:success => {:message => "Ok", :code => 200}, :status => 200}
-        begin
-          params[:sender] = nil
-          params[:sender_url] = nil
-          raise 'error' if !u.send_notification(params[:title], params[:type], params[:content], params[:url], params[:image], a.id, params[:priority], params[:importance], params[:sender], params[:sender_url], params[:icon], params[:event_name], params[:datetime], params[:location])
-        rescue
-          respond = {:error => {:message => "Error (User not found?)", :code => 404}, :status => 404}
-        end
-      else
-        respond = {:error => {:message => "Not authorized", :code => 401}, :status => 401}
-      end
-      render json: respond, status: respond[:status]
-    else
-      render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
-    end
-  end
+  # Defined in app/controllers/concerns/basic_user_api.rb
 
   swagger_api :send_sms do
     summary "傳送簡訊給指定使用者"
@@ -90,21 +57,7 @@ class Api::V1::UserApiController < ApplicationController
     response :unauthorized
   end
 
-  def send_sms
-    if !User.where('id = ?', params['id']).first
-      render json: {:error => {:message => "User not found", :code => 404}, :status => 404}, status: 404
-    else
-
-      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if @is_admin
-        scopes = ['admin']
-      else
-        scopes = t.scopes
-      end
-      respond = User.find(params['id'].tr('^0-9', '')).api_send_sms(params['message'], @app.id, scopes, @is_admin)
-      render json: respond, status: respond[:status]
-    end
-  end
+  # Defined in app/controllers/concerns/basic_user_api.rb
 
 
   swagger_api :rfid_scan do
@@ -118,7 +71,7 @@ class Api::V1::UserApiController < ApplicationController
   end
 
   def rfid_scan
-    if @app.data.allow_use_of_user_rfid || @is_admin
+    if @app.data.allow_use_of_user_rfid || @admin
       rfid_data = UserRfidData.find_by_code(params[:id])
       if !!rfid_data
         user = UserRfidData.find_by_code(params[:id]).user
@@ -127,7 +80,7 @@ class Api::V1::UserApiController < ApplicationController
         else
           render json: { sid: rfid_data.sid, student_id: rfid_data.sid }
         end
-        # if @is_admin
+        # if @admin
         #   render json: user, status: 200
         # else
         #   render json: user.select { |k, v| ['id', 'name'].include? k }, status: 200
@@ -154,7 +107,7 @@ class Api::V1::UserApiController < ApplicationController
   end
 
   def list_users
-    if @is_admin
+    if @admin
       begin
         # if params[:college_code] == 'all'
           if params[:department_code] == 'all'
@@ -197,7 +150,7 @@ class Api::V1::UserApiController < ApplicationController
   end
 
   def find_user
-    if @is_admin
+    if @admin
       begin
         if params[:fbid].to_s != ''
           result = User.confirmed.where(fbid: params[:fbid]).all
@@ -222,44 +175,47 @@ class Api::V1::UserApiController < ApplicationController
 
   private
 
-  def current_resource_owner
-    User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
-  end
-
-  def find_app
+  def authenticate
+    # 尋找應用程式
     if (params['application_id'].to_s == '' || params['secret'].to_s == '')
       render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
       return false
     end
     @app = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
-    if !@app
-      render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
-      return false
-    end
-    @is_admin = false
-    if @app.admin_app?
-      @is_admin = true
-    end
-  end
-
-  def check_permissions
-    if (params['application_id'].to_s == '' || params['secret'].to_s == '')
-      render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
-      return false
-    end
 
     if @app
-      t = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
-      if t && !t.revoked_at && t.scopes.include?('offline_access')
-        return true
-      elsif @is_admin
-        return true
+      # 尋找最後一個 token
+      @token = @app.access_tokens.where('resource_owner_id = ?', params['id'].tr('^0-9', '')).order('created_at DESC').first
+      if @token && !@token.revoked_at && @token.scopes.include?('offline_access')
+        @scopes = @token.scopes.all
+      elsif @app.admin_app?
+        @scopes = @token.scopes.all
       else
         render json: {:error => {:message => "Not authorized", :code => 401}, :status => 401}, status: 401
         return false
       end
     else
       render json: {:error => {:message => "Bad application ID or secret", :code => 401}, :status => 401}, status: 401
+      return false
+    end
+
+    # Admin 特權
+    if @app.admin_app?
+      @admin = true
+      @scopes << 'admin'
+    else
+      @admin = false
+      @scopes.delete('admin')
+    end
+    @scopes = [] if @scopes.to_s == ''
+  end
+
+  def current_resource_owner
+    u = User.where(id: params['id']).first
+    if u != nil
+      return u
+    else
+      render json: {:error => {:message => "Not found", :code => 404}, :status => 404}, status: 404
       return false
     end
   end

@@ -1,9 +1,12 @@
 class Api::V1::OauthApiController < ApplicationController
+  include BasicUserApi
   doorkeeper_for :all
   respond_to     :json
   protect_from_forgery
 
   swagger_controller :users, "OAuth 2.0 User 相關 API"
+
+  before_action :authenticate
 
   swagger_api :me do
     summary "取得使用者資料"
@@ -13,7 +16,7 @@ class Api::V1::OauthApiController < ApplicationController
   end
 
   def me
-    render json: User.find(doorkeeper_token.resource_owner_id).api_get_data(doorkeeper_token.scopes, is_admin?)
+    render json: current_resource_owner.api_get_data(@scopes)
   end
 
   swagger_api :send_notification do
@@ -36,21 +39,7 @@ class Api::V1::OauthApiController < ApplicationController
     response :unauthorized
   end
 
-  def send_notification
-    if doorkeeper_token.scopes.include?('notification') || is_admin?  # 有發送權
-      respond = {:success => {:message => "Ok", :code => 200}, :status => 200}
-      begin
-        params[:sender] = nil
-        params[:sender_url] = nil
-        raise 'error' if !User.find(doorkeeper_token.resource_owner_id).send_notification(params[:title], params[:type], params[:content], params[:url], params[:image], doorkeeper_token.application_id, params[:priority], params[:importance], params[:sender], params[:sender_url], params[:icon], params[:event_name], params[:datetime], params[:location])
-      rescue
-        respond = {:error => {:message => "Error (Not found?)", :code => 404}, :status => 404}
-      end
-    else
-      respond = {:error => {:message => "Not authorized", :code => 401}, :status => 401}
-    end
-    render json: respond, status: respond[:status]
-  end
+  # Defined in app/controllers/concerns/basic_user_api.rb
 
   swagger_api :send_sms do
     summary "傳送簡訊"
@@ -63,24 +52,24 @@ class Api::V1::OauthApiController < ApplicationController
     response :service_unavailable, 'Service Unavailable 簡訊無法送出'
   end
 
-  def send_sms
-    respond = User.find(doorkeeper_token.resource_owner_id).api_send_sms(params['message'], doorkeeper_token.application_id, doorkeeper_token.scopes, is_admin?)
-    render json: respond, status: respond[:status]
-  end
+  # Defined in app/controllers/concerns/basic_user_api.rb
 
   private
 
-  def current_resource_owner
-    User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
+  def authenticate
+    @app = doorkeeper_token.application
+    @scopes = doorkeeper_token.scopes.all
+    if @app.admin_app?
+      @admin = true
+      @scopes << 'admin'
+    else
+      @admin = false
+      @scopes.delete('admin')
+    end
+    @scopes = [] if @scopes == nil
   end
 
-  def is_admin?
-    admin = false
-    if doorkeeper_token.scopes.include?('admin')
-      if doorkeeper_token.application.admin_app?
-        admin = true
-      end
-    end
-    admin
+  def current_resource_owner
+    User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
   end
 end

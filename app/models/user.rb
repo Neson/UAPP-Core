@@ -23,32 +23,38 @@ class User < ActiveRecord::Base
     'https://graph.facebook.com/' + fbid.to_s + '/picture?width=' + size.to_s + '&height=' + size.to_s
   end
 
-  def admission_college_name
-    admission_department && admission_department.college && admission_department.college.name
-  end
-
   def admission_department_name
     admission_department && admission_department.name
-  end
-
-  def college_name
-    department && department.college && department.college.name
   end
 
   def department_name
     department && department.name
   end
 
-  def send_notification(title, type=nil, content=nil, url=nil, image=nil, sender_application_id=nil, priority=3, importance=3, sender=nil, sender_url=nil, icon=nil, event_name=nil, datetime=nil, location=nil)
+  def college_name
+    department && department.college && department.college.name
+  end
 
-    priority = 3 if priority.to_s == ''
-    importance = 3 if importance.to_s == ''
-    priority = priority.to_i
-    importance = importance.to_i
-    priority = 3 if !priority.between?(0, 3)
-    importance = 3 if !importance.between?(0, 3)
+  def admission_college_name
+    admission_department && admission_department.college && admission_department.college.name
+  end
 
-    self.notifications.new({title: title, type: type, content: content, url: url, image: image, sender_application_id: sender_application_id, priority: priority, importance: importance, sender: sender, sender_url: sender_url, icon: icon, event_name: event_name, datetime: datetime, location: location}).save!
+  def college_code
+    department && department.college && department.college.code
+  end
+
+  def admission_college_code
+    admission_department && admission_department.college && admission_department.college.code
+  end
+
+  def send_notification(title, data={})
+    # data = {type: nil, content: nil, url: nil, image: nil, sender_application_id: nil, priority: 3, importance: 3, sender: nil, sender_url: nil, icon: nil, event_name: nil, datetime: nil, location: nil}
+    data[:title] = title
+
+    data[:priority] = 3 if data[:priority].to_s == '' || !data[:priority].to_i.between?(0, 3)
+    data[:importance] = 3 if data[:importance].to_s == '' || !data[:importance].to_i.between?(0, 3)
+
+    self.notifications.new(data).save!
   end
 
   def write_login_token_to_cookie(cookies)
@@ -91,76 +97,131 @@ class User < ActiveRecord::Base
     return user
   end
 
-  def api_get_data(scopes=[], admin=false)
-    userdata = {}
-    userdata['id'] = self.id
-    userdata['uid'] = self.id
-    userdata['email'] = self.email
-    userdata['name'] = self.name
-    userdata['gender'] = self.gender
-    if self.mobile?
-      userdata['mobile_verified'] = true
-    else
-      userdata['mobile_verified'] = false
+  def get_data
+    data = self.attributes
+    virtual_attributes.each do |attr|
+      data[attr] = self.send(attr)
     end
-    if scopes.include?('school') || admin
-      userdata['sid'] = self.student_id
-      userdata['student_id'] = self.student_id
-      userdata['identity'] = self.identity
-      userdata['admission_year'] = self.admission_year
-      userdata['admission_department_code'] = self.admission_department_code
-      userdata['department_code'] = self.department_code
-      userdata['college'] = self.department && self.department.college && self.department.college.name
-      userdata['admission_department'] = self.admission_department && self.admission_department.name
-      userdata['department'] = self.department && self.department.name
-    end
-    if scopes.include?('facebook') || admin
-      userdata['fbid'] = self.fbid
-      userdata['fbcover'] = self.fbcover
-    end
-    if scopes.include?('friends') || admin
-      if admin
-        userdata['friends'] = self.friends.select(:id, :name, :mobile, :email, :fbid, :gender, :student_id, :identity, :admission_year, :admission_department_code, :department_code, :fblink, :fbcover).map { |f| {id: f[:id], uid: f[:id], name: f[:name], email: f[:email], fbid: f[:fbid], gender: f[:gender], student_id: f[:student_id], identity: f[:identity], admission_year: f[:admission_year], admission_department_code: f[:admission_department_code], department_code: f[:department_code], fblink: f[:fblink], fbcover: f[:fbcover], mobile_verified: f.mobile? } }
-      else
-        userdata['friends'] = self.friends.select(:id, :name, :mobile).map { |f| {id: f[:id], uid: f[:id], name: f[:name], mobile_verified: f.mobile? } }
-      end
-    end
-    if scopes.include?('profile') || admin
-      userdata['brief'] = self.brief
-    end
-    if admin
-      userdata['settings'] = settings.get_all
-      userdata = userdata.merge(self.attributes)
-    end
-    userdata
+    return data
   end
 
-  def api_send_sms(message, application_id, scopes=[], admin=false)
-    if scopes.include?('sms') || admin  # 有發送權
-      if OauthApplicationData.get(application_id).sms_quota > 0  # 發送額度內
-        if self.mobile? && self.mobile.to_s != ''  # 可被接收
-          data = OauthApplicationData.get(application_id)
-          data.sms_quota -= 1
-          data.save
-          nexmo = Nexmo::Client.new(key: Setting.nexmo_key, secret: Setting.nexmo_secret)
-          begin
-            nexmo.send_message(from: Setting.site_name, to: self.mobile.tr('^0-9', ''), type: "unicode", text: message)
-          rescue
-            return {:error => {:message => "Send error", :code => 503}, :status => 503}
-          end
-        else
-          return {:error => {:message => "User has no mobile number", :code => 404}, :status => 404}
-        end
+  def api_get_data(scopes=[])
+    scopes = [] if scopes.to_s == ''
+    admin = scopes.include?('admin')
+
+    if scopes.include?('school')
+      user_data = self.get_data
+    else
+      user_data = self.attributes
+    end
+
+    data = {}
+
+    data_list = basic_data
+    data['uid'] = self.id
+    data['mobile_verified'] = self.mobile?
+
+    if scopes.include?('school') || admin
+      data['sid'] = self.student_id
+      data_list.concat school_data
+    end
+
+    if self.public_facebook || scopes.include?('facebook') || admin
+      data_list.concat facebook_data
+    end
+
+    if scopes.include?('profile') || admin
+      data_list.concat profile_data
+    end
+
+    data.merge! user_data.select_by_keys(data_list)
+
+    if scopes.include?('friends') || admin
+      if admin
+        data['friends'] = self.friends.map { |f| f.api_get_data(['facebook']) }
       else
-        return {:error => {:message => "Too many requests", :code => 429}, :status => 429}
+        data['friends'] = self.friends.map { |f| f.api_get_data }
+      end
+    end
+
+    if admin
+      data['settings'] = settings.get_all
+      data.merge! self.attributes
+    end
+
+    return data
+  end
+
+  def api_send_sms(message)
+    if self.mobile? && self.mobile.to_s != ''  # 可被接收
+      nexmo = Nexmo::Client.new(key: Setting.nexmo_key, secret: Setting.nexmo_secret)
+      begin
+        nexmo.send_message(from: Setting.site_name, to: self.mobile.tr('^0-9', ''), type: "unicode", text: message)
+      rescue
+        return {:error => {:message => "Send error", :code => 503}, :status => 503}
       end
     else
-      return {:error => {:message => "Not authorized", :code => 401}, :status => 401}
+      return {:error => {:message => "User has no mobile number", :code => 404}, :status => 404}
     end
+
     return {:success => {:message => "Ok", :code => 200}, :status => 200}
   end
 
-  protected
+  def public_facebook
+    true
+  end
+
+  private
+
+  def virtual_attributes
+    [
+      "admission_department_name",
+      "department_name",
+      "college_name",
+      "admission_college_name",
+      "college_code",
+      "admission_college_code",
+    ]
+  end
+
+  def basic_data
+    [
+      'id',
+      'email',
+      'name',
+      'gender',
+    ]
+  end
+
+  def school_data
+    [
+      'student_id',
+      'identity',
+      'admission_year',
+      'admission_department_code',
+      'admission_department_name',
+      'admission_college_code',
+      'admission_college_name',
+      'department_code',
+      'department_name',
+      'college_code',
+      'college_name',
+    ]
+  end
+
+  def facebook_data
+    [
+      'fbid',
+      'fbcover',
+      'avatar',
+    ]
+  end
+
+  def profile_data
+    [
+      'brief',
+    ]
+  end
 
   def send_confirmation_notification?
     false
