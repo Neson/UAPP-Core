@@ -41,13 +41,14 @@ class UsersController < ApplicationController
       if email =~ Setting.email_regexp
         if @user.update_attribute(:email, email)
           data = Setting.email_analysis_regexp.match(email)
+          data = Hash[data.names.zip(data.captures)]
           if data
             identities = { b: 'bachelor', m: 'master', d: 'doctor' }
-            @user.identity = identities[data[:identity_id].to_sym]
-            @user.admission_year = data[:admission_year].to_i
-            @user.admission_department_code = data[:admission_department_code].to_s
-            @user.department_code = data[:admission_department_code].to_s
-            @user.student_id = data[:student_id]
+            @user.identity = data.has_key?(:identity_id) ? identities[data[:identity_id].to_sym] : 'other'
+            @user.admission_year = data[:admission_year].to_i if data.has_key?(:admission_year)
+            @user.admission_department_code = data[:admission_department_code].to_s if data.has_key?(:admission_department_code)
+            @user.department_code = data[:admission_department_code].to_s if data.has_key?(:admission_department_code)
+            @user.student_id = data[:student_id] if data.has_key?(:student_id)
           else
             @user.identity = 'other'
             @user.admission_year = nil
