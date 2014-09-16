@@ -5,7 +5,7 @@ class Api::V1::UserApiController < ApplicationController
 
   swagger_controller :user, "使用者存取相關 API"
 
-  before_action :authenticate
+  before_action :authenticate, :except => [:rfid_scan]
 
   swagger_api :user_data do
     summary "取得指定使用者資料"
@@ -71,12 +71,13 @@ class Api::V1::UserApiController < ApplicationController
   end
 
   def rfid_scan
-    if @app.data.allow_use_of_user_rfid || @admin
+    @app = Doorkeeper::Application.where(["uid = ? and secret = ?", params['application_id'].tr('^A-Za-z0-9', ''), params['secret'].tr('^A-Za-z0-9', '')]).first
+    if @app && (@app.data.allow_use_of_user_rfid || @admin)
       rfid_data = UserRfidData.find_by_code(params[:id])
       if !!rfid_data
         user = UserRfidData.find_by_code(params[:id]).user
         if !!user
-          render json: user.api_get_data(['public', 'school'], false)
+          render json: user.api_get_data(['public', 'school'])
         else
           render json: { sid: rfid_data.sid, student_id: rfid_data.sid }
         end
@@ -189,7 +190,7 @@ class Api::V1::UserApiController < ApplicationController
       if @token && !@token.revoked_at && @token.scopes.include?('offline_access')
         @scopes = @token.scopes.all
       elsif @app.admin_app?
-        @scopes = @token.scopes.all
+        @scopes = ['admin']
       else
         render json: {:error => {:message => "Not authorized", :code => 401}, :status => 401}, status: 401
         return false
