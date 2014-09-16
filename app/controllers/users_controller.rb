@@ -44,19 +44,19 @@ class UsersController < ApplicationController
           data = Hash[data.names.zip(data.captures)]
           if data
             identities = { b: 'bachelor', m: 'master', d: 'doctor' }
-            @user.identity = data.has_key?(:identity_id) ? identities[data[:identity_id].to_sym] : 'other'
-            @user.admission_year = data[:admission_year].to_i if data.has_key?(:admission_year)
-            if data.has_key?(:admission_department_code) && !!Department.where(code: data[:admission_department_code].to_s).first
-              @user.admission_department_code = data[:admission_department_code].to_s
-              @user.department_code = data[:admission_department_code].to_s
+            @user.identity = data.has_key?('identity_id') ? identities[data['identity_id'].to_sym] : 'other'
+            @user.admission_year = data['admission_year'].to_i if data.has_key?('admission_year')
+            if data.has_key?('admission_department_code') && !!Department.where(code: data['admission_department_code'].to_s).first
+              @user.admission_department_code = data['admission_department_code'].to_s
+              @user.department_code = data['admission_department_code'].to_s
             end
-            @user.student_id = data[:student_id] if data.has_key?(:student_id)
+            @user.student_id = data['student_id'] if data.has_key?('student_id')
           else
             @user.identity = 'other'
             @user.admission_year = nil
             @user.admission_department_code = nil
             @user.department_code = nil
-            @user.student_id = nil
+            @user.student_id = email.gsub(/@.*$/, '')
           end
             @user.save
           # @user.send_confirmation_instructions # this will be done automatically
