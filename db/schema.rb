@@ -11,7 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140910223947) do
+ActiveRecord::Schema.define(version: 20140916004506) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
 
   create_table "active_admin_comments", force: true do |t|
     t.string   "namespace"
@@ -24,9 +27,9 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
-  add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id"
-  add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace"
-  add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id"
+  add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
+  add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace", using: :btree
+  add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
 
   create_table "admins", force: true do |t|
     t.string   "username",               default: "", null: false
@@ -45,10 +48,10 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "locked_at"
   end
 
-  add_index "admins", ["email"], name: "index_admins_on_email", unique: true
-  add_index "admins", ["reset_password_token"], name: "index_admins_on_reset_password_token", unique: true
-  add_index "admins", ["unlock_token"], name: "index_admins_on_unlock_token", unique: true
-  add_index "admins", ["username"], name: "index_admins_on_username", unique: true
+  add_index "admins", ["email"], name: "index_admins_on_email", unique: true, using: :btree
+  add_index "admins", ["reset_password_token"], name: "index_admins_on_reset_password_token", unique: true, using: :btree
+  add_index "admins", ["unlock_token"], name: "index_admins_on_unlock_token", unique: true, using: :btree
+  add_index "admins", ["username"], name: "index_admins_on_username", unique: true, using: :btree
 
   create_table "colleges", force: true do |t|
     t.string   "code"
@@ -57,6 +60,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
+  add_index "colleges", ["code"], name: "index_colleges_on_code", using: :btree
+
   create_table "departments", force: true do |t|
     t.string   "code"
     t.string   "name"
@@ -64,6 +69,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
     t.string   "college_code"
   end
+
+  add_index "departments", ["code"], name: "index_departments_on_code", using: :btree
 
   create_table "notifications", force: true do |t|
     t.integer  "user_id",                               null: false
@@ -87,6 +94,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
+  add_index "notifications", ["user_id"], name: "index_notifications_on_user_id", using: :btree
+
   create_table "oauth_access_grants", force: true do |t|
     t.integer  "resource_owner_id", null: false
     t.integer  "application_id",    null: false
@@ -98,7 +107,7 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.string   "scopes"
   end
 
-  add_index "oauth_access_grants", ["token"], name: "index_oauth_access_grants_on_token", unique: true
+  add_index "oauth_access_grants", ["token"], name: "index_oauth_access_grants_on_token", unique: true, using: :btree
 
   create_table "oauth_access_tokens", force: true do |t|
     t.integer  "resource_owner_id"
@@ -111,9 +120,9 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.string   "scopes"
   end
 
-  add_index "oauth_access_tokens", ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
-  add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
-  add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true
+  add_index "oauth_access_tokens", ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true, using: :btree
+  add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id", using: :btree
+  add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true, using: :btree
 
   create_table "oauth_application_data", force: true do |t|
     t.integer  "application_id"
@@ -122,6 +131,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
     t.boolean  "allow_use_of_user_rfid", default: false, null: false
   end
+
+  add_index "oauth_application_data", ["application_id"], name: "index_oauth_application_data_on_application_id", using: :btree
 
   create_table "oauth_applications", force: true do |t|
     t.string   "name",         null: false
@@ -134,8 +145,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.string   "owner_type"
   end
 
-  add_index "oauth_applications", ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type"
-  add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  add_index "oauth_applications", ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type", using: :btree
+  add_index "oauth_applications", ["uid"], name: "index_oauth_applications_on_uid", unique: true, using: :btree
 
   create_table "settings", force: true do |t|
     t.string   "var",                   null: false
@@ -146,7 +157,7 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
-  add_index "settings", ["thing_type", "thing_id", "var"], name: "index_settings_on_thing_type_and_thing_id_and_var", unique: true
+  add_index "settings", ["thing_type", "thing_id", "var"], name: "index_settings_on_thing_type_and_thing_id_and_var", unique: true, using: :btree
 
   create_table "site_navigations", force: true do |t|
     t.string   "url"
@@ -170,6 +181,9 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
+  add_index "user_friendships", ["friend_id"], name: "index_user_friendships_on_friend_id", using: :btree
+  add_index "user_friendships", ["user_id"], name: "index_user_friendships_on_user_id", using: :btree
+
   create_table "user_rfid_data", force: true do |t|
     t.string   "sid",            null: false
     t.string   "encrypted_code", null: false
@@ -177,8 +191,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.datetime "updated_at"
   end
 
-  add_index "user_rfid_data", ["encrypted_code"], name: "index_user_rfid_data_on_encrypted_code", unique: true
-  add_index "user_rfid_data", ["sid"], name: "index_user_rfid_data_on_sid", unique: true
+  add_index "user_rfid_data", ["encrypted_code"], name: "index_user_rfid_data_on_encrypted_code", unique: true, using: :btree
+  add_index "user_rfid_data", ["sid"], name: "index_user_rfid_data_on_sid", unique: true, using: :btree
 
   create_table "users", force: true do |t|
     t.string   "email",                       default: "",    null: false
@@ -221,8 +235,8 @@ ActiveRecord::Schema.define(version: 20140910223947) do
     t.string   "fbcover"
   end
 
-  add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
-  add_index "users", ["email"], name: "index_users_on_email", unique: true
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
+  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
 end
