@@ -1,63 +1,65 @@
 # UAPP-Core configuration file
-# 沒有 .example 尾綴的組態檔會優先被讀取，若不存在將由帶有 .example 尾綴的代替。
-# 除了監測與分析工具外，所有組態必須正確設定，否則會導致程式錯誤。
+# Configuration files with no `.example` suffix will be used if exists.
+# All configuration must be set correctly (except Monitoring and Analysis Tools),
+# otherwise they will lead to application exceptions.
 
-# 預設由環境變數取得組態，可以由底下的特定環境設定來覆寫。
+# Read configurations from environment variables by default,
+# this will be overwritten by enviroment specific settings below.
 defaults: &defaults
 
-  # 密鑰。
-  # 全站密鑰，用於共用資料的加密，所有站點必須一致。
+  # Secret.
+  # Site Secret Key, must be consistent across all apps that belongs to the same site.
   site_secret_key: <%= ENV["SITE_SECRET_KEY"] %>
-  # 本站密鑰。
+  # App Secret Key.
   app_secret_key: <%= ENV["APP_SECRET_KEY"] %>
-  # Pepper。
+  # Pepper.
   app_pepper: <%= ENV["APP_PEPPER"] %>
 
-  # 網址。
-  # 本站所在網域。
+  # Domain & URL
+  # The domain of app.
   app_domain: <%= ENV["APP_DOMAIN"] %>
-  # 本站所在網址。
+  # The url of app.
   app_url: <%= ENV["APP_URL"] %>
 
-  # 名稱、描述。
+  # App Name & Description.
   site_name: <%= ENV["SITE_NAME"] %>
   org_name: <%= ENV["ORG_NAME"] %>
   app_name: <%= ENV["APP_NAME"] %>
   app_description: <%= ENV["APP_DESCRIPTION"] %>
   app_keywords: <%= ENV["APP_KEYWORDS"] %>
 
-  # 管理人員與預設送信地址資料。
+  # Administrator & Mailer Sender Address.
   administrator_email: <%= ENV["ADMINISTRATOR_EMAIL"] %>
   administrator_url: <%= ENV["ADMINISTRATOR_URL"] %>
   mailer_sender: <%= ENV["MAILER_SENDER"] %>
 
-  # Facebook。
+  # Facebook.
   facebook_app_id: <%= ENV["FACEBOOK_APP_ID"] %>
   facebook_app_secret: <%= ENV["FACEBOOK_APP_SECRET"] %>
 
-  # 註冊 email 格式驗證與分析。
-  # Email 地址限制正規表示式，例如 '.+@mail\.ntust\.edu\.tw$' 或 '.+@.*\.edu\.tw$'。
+  # Registered Email Format Verification and Analysis.
+  # Restrictions email address with regex, e.g.: '.+@mail\.ntust\.edu\.tw$' or '.+@.*\.edu\.tw$'.
   email_regexp_s: <%= ENV["EMAIL_REGEXP_S"] %>
-  # Email 格式分析正規表示式，使用 named groups (student_id：學號、identity_id：身份代碼 (bmd)、admission_year：入學年度、admission_department_code：入學科系代碼) 拆解出可用資訊。
-  # 例如：'^(?<student_id>(?<identity_id>[bmd])(?<admission_year>\d*)(?<admission_department_code>\d{2})\d{3})@mail\.ntust\.edu\.tw$'。
+  # Analysis email address with regex, using named capture groups (student_id, identity_id (bmd), admission_year, admission_department_code).
+  # e.g.: '^(?<student_id>(?<identity_id>[bmd])(?<admission_year>\d*)(?<admission_department_code>\d{2})\d{3})@mail\.ntust\.edu\.tw$'.
   email_analysis_regexp_s: <%= ENV["EMAIL_ANALYSIS_REGEXP_S"] %>
 
-  # Mailgun。
+  # Mailgun.
   mailgun_api_key: <%= ENV["MAILGUN_API_KEY"] %>
   mailgun_domain: <%= ENV["MAILGUN_DOMAIN"] %>
 
-  # Nexmo。
+  # Nexmo.
   nexmo_key: <%= ENV["NEXMO_KEY"] %>
   nexmo_secret: <%= ENV["NEXMO_SECRET"] %>
 
-  # 監測與分析工具。
-  # Google Analytics。
+  # Monitoring and Analysis Tools.
+  # Google Analytics.
   google_analytics_id: <%= ENV["GOOGLE_ANALYTICS_ID"] %>
-  # New Relic。
+  # New Relic.
   newrelic_license_key: <%= ENV["NEWRELIC_LICENSE_KEY"] %>
 
 
-# 特定環境設定。
+# Enviroment specific settings.
 
 production:
   <<: *defaults
