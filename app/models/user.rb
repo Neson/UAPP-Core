@@ -59,8 +59,8 @@ class User < ActiveRecord::Base
 
   def write_login_token_to_cookie(cookies)
     t = Time.now.to_i.to_s
-    cookies[:login_token_gtime] = { value: t, domain: '.' + Setting.app_domain }
-    cookies[:login_token] = { value: Digest::MD5.hexdigest(Setting.site_secret_key + t + self.id.to_s), domain: '.' + Setting.app_domain }
+    cookies[:login_token_gtime] = { :expires => 1.year.from_now, value: t, domain: '.' + Setting.app_domain.gsub(/^www./, '') }
+    cookies[:login_token] = { :expires => 1.year.from_now, value: Digest::MD5.hexdigest(Setting.site_secret_key + t + self.id.to_s), domain: '.' + Setting.app_domain.gsub(/^www./, '') }
   end
 
   def self.from_facebook(auth)
