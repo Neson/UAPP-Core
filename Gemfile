@@ -49,7 +49,7 @@ gem 'markdown-rails'
 gem 'redcarpet', '~> 3.1.2'
 
 gem 'normalize-rails', '>= 3.0.1'
-gem 'semantic-ui-sass', '>=  0.16.1.0'
+gem 'semantic-ui-sass', '>= 0.16.1.0'
 
 gem 'modernizr-rails'
 gem 'nprogress-rails', '~> 0.1.3.1'

@@ -1,6 +1,6 @@
 = render layout: 'me/me' do
   - if current_user.admin?
-    .ui.left.floated.header 
+    .ui.left.floated.header
       所有應用程式
       = link_to '新增', new_oauth_application_path, class: 'ui green mini flat button'
       .ui.label
@@ -9,7 +9,7 @@
           %i.star.icon
           admin
   - else
-    .ui.left.floated.header 
+    .ui.left.floated.header
       您的應用程式
       = link_to '新增', new_oauth_application_path, class: 'ui green mini flat button'
   %table.ui.table.segment

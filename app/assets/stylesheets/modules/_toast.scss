@@ -1,0 +1,76 @@
+// *************************************
+//
+//   Toast
+//   -> Flash message
+//
+// *************************************
+
+#toast-container {
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 0 4px;
+	@include z-index('toast');
+	margin-top: $top-menu-height;
+	padding-top: 7px;
+	overflow: hidden;
+
+
+	.toast {
+		position: relative;
+		box-sizing: border-box;
+		width: 100%;
+		max-width: $base-content-maxWidth;
+		margin: auto;
+		@include box-shadow(0 2px 5px 0 rgba(0, 0, 0, 0.26));
+		border-radius: 2px;
+		opacity: 1;
+		min-height: 25px;
+		vertical-align: center;
+		line-height: 25px;
+		margin-bottom: 7px !important;
+		height: auto !important;
+
+		&.show {
+			@include transition-property(margin-top);
+			@include transition-duration(.3s);
+			margin-top: 0 !important;
+		}
+
+		&.toast-success {
+		  background-color: $success-color;
+		}
+		&.toast-error {
+		  background-color: $error-color;
+		}
+		&.toast-info {
+		  background-color: $info-color;
+		}
+		&.toast-warning {
+		  background-color: $warning-color;
+		}
+
+		.action {
+			float: right;
+			margin-left: 12px;
+			margin-top: -15px;
+			@media all and (max-width: 480px) { margin-top: -8px; }
+
+			input[type=submit], .button {
+				border: none;
+				background: none;
+				font-weight: 500;
+				padding: 2px 16px;
+
+				&:hover {
+					background: rgba(255,255,255, .2);
+				}
+
+				&:last-child {
+					margin-right: -100px;
+					padding-right: 107px;
+				}
+			}
+		}
+	}
+}

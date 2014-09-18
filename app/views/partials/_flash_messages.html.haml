@@ -1,4 +1,10 @@
+- count = 0
 - flash.each do |type, message|
-  .ui.info.message{:class => "#{type}"}
-    %i.close.icon
-    %p= message
+  - count += 1
+  :coffeescript
+    setTimeout ->
+      flash_message.#{type}("#{message}")
+    , #{(count - 1)*1200 + 1}
+  =#.ui.info.message{:class => "#{type}"}
+  =#  %i.close.icon
+  =#  %p= message

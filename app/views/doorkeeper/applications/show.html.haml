@@ -1,7 +1,7 @@
 = render layout: 'me/me' do
 
   .ui.head.h2
-    %small 
+    %small
       = link_to '應用程式/ ', oauth_applications_path
     #{@application.name}
 
@@ -10,30 +10,30 @@
       %i.bolt.icon
       .content
         .header Application Id
-        .description 
+        .description
           應用程式 ID
         %code#application_id= @application.uid
     .item
       %i.key.icon
       .content
         %a.header Secret
-        .description 
+        .description
           應用程式密鑰
         %code#secret= @application.secret
     .item
       %i.map.icon
       .content
         %a.header Callback urls
-        .description 
+        .description
           網址
         .ui.small.divided.list
           - @application.redirect_uri.split.each do |uri|
             .item
               = link_to 'Authorize', oauth_authorization_path(client_id: @application.uid, redirect_uri: uri, response_type: 'code'), class: 'right floated tiny ui purple button', target: '_blank'
               .content
-                .header 
+                .header
                   %code= uri
-  
+
   = form_tag [:oauth, @application] do
     %input{:name => "_method", :type => "hidden", :value => "delete"}
     .ui.buttons

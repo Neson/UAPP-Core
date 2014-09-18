@@ -33,6 +33,7 @@ $zIndex-elements: backstage,
                   ngprogress,
                   header,
                     header_content,
+                  toast,
                   top_menu,
                     top_menu_content,
                   trigger;
@@ -54,6 +55,11 @@ $violet: #673ab7 !default;
 $primary-color: <%= (ENV["APP_PRIMARY_COLOR"].to_s != '' && ENV["APP_PRIMARY_COLOR"]) || '$black' %> !default;
 $secondary-color: <%= (ENV["APP_SECONDARY_COLOR"].to_s != '' && ENV["APP_SECONDARY_COLOR"]) || '$blue' %> !default;
 $tertiary-colour: <%= (ENV["APP_TERTIARY_COLOUR"].to_s != '' && ENV["APP_TERTIARY_COLOUR"]) || '$orange' %> !default;
+
+$success-color: #51a351;
+$error-color: #bd362f;
+$info-color: #2f96b4;
+$warning-color: #f89406;
 
 // ----- Base Colors ----- //
 
