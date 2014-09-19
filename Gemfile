@@ -43,6 +43,7 @@ gem 'unicorn'
 gem 'settingslogic', '~> 2.0.9'
 gem 'rails-settings-cached', '0.4.1'
 
+gem 'jammit'
 gem 'haml'
 gem 'haml-rails', '~> 0.5.3'
 gem 'markdown-rails'
