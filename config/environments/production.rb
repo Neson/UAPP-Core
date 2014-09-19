@@ -84,5 +84,25 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  config.gem "jammit"
+  # Compression
+  config.middleware.use Rack::Deflater
+  config.middleware.insert_before ActionDispatch::Static, Rack::Deflater
+
+  config.middleware.use HtmlCompressor::Rack,
+    enabled: true,
+    preserve_line_breaks: false,
+    remove_comments: true,
+    remove_form_attributes: false,
+    remove_http_protocol: false,
+    remove_https_protocol: false,
+    remove_input_attributes: false,
+    remove_intertag_spaces: false,
+    remove_javascript_protocol: true,
+    remove_link_attributes: false,
+    remove_multi_spaces: false,
+    remove_quotes: false,
+    remove_script_attributes: false,
+    remove_style_attributes: false,
+    simple_boolean_attributes: true,
+    simple_doctype: false
 end

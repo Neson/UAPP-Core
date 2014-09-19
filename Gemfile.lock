@@ -100,7 +100,6 @@ GEM
       sass (~> 3.2.19)
     compass-rails (2.0.0)
       compass (>= 0.12.2)
-    cssmin (1.0.3)
     debug_inspector (0.0.2)
     devise (3.2.4)
       bcrypt (~> 3.0)
@@ -147,6 +146,7 @@ GEM
       activesupport (>= 3.2, < 5)
     hashie (3.2.0)
     hike (1.2.3)
+    htmlcompressor (0.1.2)
     http_parser.rb (0.6.0)
     httparty (0.13.1)
       json (~> 1.8)
@@ -155,9 +155,6 @@ GEM
     inherited_resources (1.4.1)
       has_scope (~> 0.6.0.rc)
       responders (~> 1.0.0.rc)
-    jammit (0.6.6)
-      cssmin (>= 1.0.3)
-      jsmin (>= 1.0.1)
     jbuilder (2.1.3)
       activesupport (>= 3.0.0, < 5)
       multi_json (~> 1.2)
@@ -166,7 +163,6 @@ GEM
       thor (>= 0.14, < 2.0)
     jquery-ui-rails (5.0.0)
       railties (>= 3.2.16)
-    jsmin (1.0.1)
     json (1.8.1)
     jwt (1.0.0)
     kaminari (0.16.1)
@@ -335,8 +331,8 @@ DEPENDENCIES
   guard-livereload
   haml
   haml-rails (~> 0.5.3)
+  htmlcompressor
   httparty (~> 0.13.1)
-  jammit
   jbuilder (~> 2.0)
   jquery-rails
   mailgunner (~> 2.0.0)
