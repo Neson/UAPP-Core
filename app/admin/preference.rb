@@ -57,13 +57,28 @@ ActiveAdmin.register_page "Preference" do
           ol do
 
             li do
-              label 'Throughput Chart Code'
-              f.input :name => "data[admin_throughput_chart_code]", :type => 'text', :value => Preference.admin_throughput_chart_code
+              label 'App Monitor URL'
+              f.input :name => "data[admin_app_monitor_url]", :type => 'text', :value => Preference.admin_app_monitor_url
             end
 
             li do
               label 'Web Transactions Chart Code'
               f.input :name => "data[admin_web_transactions_chart_code]", :type => 'text', :value => Preference.admin_web_transactions_chart_code
+            end
+
+            li do
+              label 'Apdex Score Chart Code'
+              f.input :name => "data[admin_apdex_score_chart_code]", :type => 'text', :value => Preference.admin_apdex_score_chart_code
+            end
+
+            li do
+              label 'Throughput Chart Code'
+              f.input :name => "data[admin_throughput_chart_code]", :type => 'text', :value => Preference.admin_throughput_chart_code
+            end
+
+            li do
+              label 'Error Rate Chart Code'
+              f.input :name => "data[admin_error_rate_chart_code]", :type => 'text', :value => Preference.admin_error_rate_chart_code
             end
 
           end

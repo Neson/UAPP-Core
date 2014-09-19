@@ -33,28 +33,33 @@ ActiveAdmin.register_page "Dashboard" do
             end
           end
         end
+        if Preference['admin_apdex_score_chart_code'].to_s != ''
+          panel "<a target=\"_blank\" href=\"#{Preference['admin_app_monitor_url']}\">System Apdex Score</a>".html_safe do
+            div Preference['admin_apdex_score_chart_code'].html_safe
+          end
+        end
       end
       column do
         if Preference['admin_throughput_chart_code'].to_s != ''
-          panel "Throughput" do
+          panel "<a target=\"_blank\" href=\"#{Preference['admin_app_monitor_url']}\">Throughput</a>".html_safe do
             div Preference['admin_throughput_chart_code'].html_safe
           end
         end
-        panel "Recent Signed-In Users" do
+        panel '<a href="/admin/users?q%5Bcurrent_sign_in_at_gteq%5D=1994-07-02&order=current_sign_in_at_desc&as=detailed_table">Recent Signed-In Users</a>'.html_safe do
           table_for User.where('current_sign_in_at IS NOT NULL').order("current_sign_in_at DESC").limit(10) do
             column("Name") { |user| link_to(user.name, admin_user_path(user)) }
-            column("Fbid") { |user| link_to(user.fbid, "https://facebook.com/#{user.fbid}", :target => "_blank") }
+            column("Fbid") { |user| link_to(truncate(user.fbid, length: 8), "https://facebook.com/#{user.fbid}", :target => "_blank") }
             column("SID") { |user| user.student_id }
-            column("Current Sign In") { |user| user.current_sign_in_at && distance_of_time_in_words_to_now(user.current_sign_in_at) }
-            column("Sign In Count") { |user| user.sign_in_count }
-            column("IP") { |user| user.current_sign_in_ip }
+            column("Sign In Time") { |user| user.current_sign_in_at && distance_of_time_in_words_to_now(user.current_sign_in_at) }
+            column("Sign In Count") { |user| "#{user.sign_in_count} (#{'%.3f' % (user.sign_in_count.to_f / ((Time.now - user.created_at) / 1.day)+0.5)}/day)" }
+            column("IP") { |user| (user.current_sign_in_ip == user.last_sign_in_ip) ? status_tag(user.current_sign_in_ip, :class => 'yes') : status_tag(user.current_sign_in_ip) }
             column("Last Sign In Ip") { |user| user.last_sign_in_ip }
           end
         end
-        panel "Recent Registered Users" do
+        panel '<a href="/admin/users?order=created_at_desc&as=detailed_table">Recent Registered Users</a>'.html_safe do
           table_for User.order("created_at DESC").limit(10) do
             column("Name") { |user| link_to(user.name, admin_user_path(user)) }
-            column("Fbid") { |user| link_to(user.fbid, "https://facebook.com/#{user.fbid}", :target => "_blank") }
+            column("Fbid") { |user| link_to(truncate(user.fbid, length: 20), "https://facebook.com/#{user.fbid}", :target => "_blank") }
             column("SID") { |user| user.student_id }
             column("Created At") { |user| user.created_at }
             column("Confirmed") do |user|
@@ -65,6 +70,11 @@ ActiveAdmin.register_page "Dashboard" do
               end
             end
             column("IP") { |user| user.current_sign_in_ip }
+          end
+        end
+        if Preference['admin_error_rate_chart_code'].to_s != ''
+          panel "<a target=\"_blank\" href=\"#{Preference['admin_app_monitor_url']}\">Error Rate</a>".html_safe do
+            div Preference['admin_error_rate_chart_code'].html_safe
           end
         end
       end
