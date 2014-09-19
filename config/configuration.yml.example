@@ -57,6 +57,7 @@ defaults: &defaults
   google_analytics_id: <%= ENV["GOOGLE_ANALYTICS_ID"] %>
   # New Relic.
   newrelic_license_key: <%= ENV["NEWRELIC_LICENSE_KEY"] %>
+  newrelic_app_name: <%= ENV["NEWRELIC_APP_NAME"] %>
 
 
 # Enviroment specific settings.
