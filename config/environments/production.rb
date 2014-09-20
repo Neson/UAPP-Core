@@ -50,6 +50,12 @@ Rails.application.configure do
   # Use a different logger for distributed setups.
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
+  # Send logs to a remote server
+  if !Setting['remote_logger_host'].blank? && !Setting['remote_logger_port'].blank?
+    Setting['remote_logger_app_local_hostname'] = Rails.application.class.parent_name.scan(/[A-Z]/).join().underscore + '-' + Setting.app_url.match(/https?:\/\/([A-Za-z0-9]+)/).captures[0]
+    config.logger = RemoteSyslogLogger.new(Setting['remote_logger_host'], Setting['remote_logger_port'], :local_hostname => Setting['remote_logger_app_local_hostname'], :program => 'rails-' + Rails.application.class.parent_name.underscore)
+  end
+
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 

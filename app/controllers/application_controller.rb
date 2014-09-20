@@ -15,6 +15,7 @@ class ApplicationController < ActionController::Base
   private
 
   def check_url
+    Rails.logger = Rails.application.config.logger if !!Rails.application.config.logger
     if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/)
       redirect_to(Setting.app_url.gsub(/\/$/, '') + request.fullpath) && return
     end

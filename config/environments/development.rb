@@ -23,6 +23,12 @@ Rails.application.configure do
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
+  # Send logs to a remote server
+  if !Setting['remote_logger_host'].blank? && !Setting['remote_logger_port'].blank?
+    Setting['remote_logger_app_local_hostname'] = Rails.application.class.parent_name.scan(/[A-Z]/).join().underscore + '-' + Setting.app_url.match(/https?:\/\/([A-Za-z0-9]+)/).captures[0]
+    config.logger = RemoteSyslogLogger.new(Setting['remote_logger_host'], Setting['remote_logger_port'], :local_hostname => Setting['remote_logger_app_local_hostname'], :program => 'rails-' + Rails.application.class.parent_name.underscore)
+  end
+
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
 

@@ -98,6 +98,7 @@ gem 'awesome_print', :require => false
 gem 'hirb', :require => false
 gem 'hirb-unicode', :require => false
 
+gem 'remote_syslog_logger', '~> 1.0.3'
 gem 'newrelic_rpm'
 
 ruby "2.0.0"

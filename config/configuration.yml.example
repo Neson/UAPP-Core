@@ -53,6 +53,9 @@ defaults: &defaults
   nexmo_secret: <%= ENV["NEXMO_SECRET"] %>
 
   # Monitoring and Analysis Tools.
+  # Remote Logger.
+  remote_logger_host: <%= ENV["REMOTE_LOGGER_HOST"] %>
+  remote_logger_port: <%= ENV["REMOTE_LOGGER_PORT"] %>
   # Google Analytics.
   google_analytics_id: <%= ENV["GOOGLE_ANALYTICS_ID"] %>
   # New Relic.
@@ -89,6 +92,8 @@ development:
   nexmo_secret: 'nexmo_secret_here'
   facebook_app_id: 'facebook_app_id_here'
   facebook_app_secret: 'facebook_app_secret_here'
+  remote_logger_host: ''
+  remote_logger_port: ''
   google_analytics_id: 'google_analytics_id_here'
   newrelic_license_key: 'newrelic_license_key_here'
   email_regexp_s: '.+@.*$'
