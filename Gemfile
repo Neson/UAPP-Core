@@ -89,7 +89,14 @@ end
 
 # For Heroku assets
 gem 'rails_12factor', group: :production
+
 gem 'rb-readline', '~> 0.5.1'
+gem 'pry-rails'
+gem 'pry-plus'
+gem 'pry-remote'
+gem 'awesome_print', :require => false
+gem 'hirb', :require => false
+gem 'hirb-unicode', :require => false
 
 gem 'newrelic_rpm'
 

@@ -7,14 +7,14 @@ GIT
 
 GIT
   remote: git://github.com/activerecord-hackery/ransack.git
-  revision: 9a5c6d2d4a762595bf8304d3f78ef50a0c476d31
+  revision: 0ea6ae2f41373d2187f7511fdd4a8f24fefb2db0
   specs:
-    ransack (1.2.3)
+    ransack (1.3.0)
       actionpack (>= 3.0)
       activerecord (>= 3.0)
       activesupport (>= 3.0)
       i18n
-      polyamorous (~> 1.1.0)
+      polyamorous (~> 1.1)
 
 GIT
   remote: git://github.com/gregbell/active_admin.git
@@ -69,22 +69,24 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
-    arbre (1.0.1)
+    arbre (1.0.2)
       activesupport (>= 3.0.0)
     arel (5.0.1.20140414130214)
+    awesome_print (1.2.0)
     bcrypt (3.1.7)
     better_errors (1.1.0)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
+    bond (0.5.1)
     bourbon (3.2.3)
       sass (~> 3.2)
       thor
     builder (3.2.2)
     callsite (0.0.11)
-    celluloid (0.15.2)
-      timers (~> 1.1.0)
+    celluloid (0.16.0)
+      timers (~> 4.0.0)
     chunky_png (1.3.1)
     coderay (1.1.0)
     coffee-rails (4.0.1)
@@ -93,7 +95,8 @@ GEM
     coffee-script (2.3.0)
       coffee-script-source
       execjs
-    coffee-script-source (1.7.1)
+    coffee-script-source (1.8.0)
+    columnize (0.8.9)
     compass (0.12.7)
       chunky_png (~> 1.2)
       fssm (>= 0.2.7)
@@ -101,6 +104,12 @@ GEM
     compass-rails (2.0.0)
       compass (>= 0.12.2)
     debug_inspector (0.0.2)
+    debugger (1.6.8)
+      columnize (>= 0.3.1)
+      debugger-linecache (~> 1.2.0)
+      debugger-ruby_core_source (~> 1.3.5)
+    debugger-linecache (1.2.0)
+    debugger-ruby_core_source (1.3.5)
     devise (3.2.4)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -119,7 +128,7 @@ GEM
       multipart-post (>= 1.2, < 3)
     ffi (1.9.3)
     formatador (0.2.5)
-    formtastic (2.3.0.rc4)
+    formtastic (2.3.1)
       actionpack (>= 3.0)
     fssm (0.2.10)
     growl_notify (0.0.3)
@@ -144,8 +153,13 @@ GEM
     has_scope (0.6.0.rc)
       actionpack (>= 3.2, < 5)
       activesupport (>= 3.2, < 5)
-    hashie (3.2.0)
+    hashie (3.3.1)
     hike (1.2.3)
+    hirb (0.7.2)
+    hirb-unicode (0.0.5)
+      hirb (~> 0.5)
+      unicode-display_width (~> 0.1.1)
+    hitimes (1.2.2)
     htmlcompressor (0.1.2)
     http_parser.rb (0.6.0)
     httparty (0.13.1)
@@ -155,10 +169,13 @@ GEM
     inherited_resources (1.4.1)
       has_scope (~> 0.6.0.rc)
       responders (~> 1.0.0.rc)
+    interception (0.5)
     jbuilder (2.1.3)
       activesupport (>= 3.0.0, < 5)
       multi_json (~> 1.2)
-    jquery-rails (3.1.1)
+    jist (1.5.1)
+      json
+    jquery-rails (3.1.2)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     jquery-ui-rails (5.0.0)
@@ -187,12 +204,12 @@ GEM
       railties (>= 3.0.0, < 5.0.0)
     method_source (0.8.2)
     mime-types (1.25.1)
-    minitest (5.4.0)
+    minitest (5.4.1)
     modernizr-rails (2.7.1)
     multi_json (1.10.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
-    newrelic_rpm (3.9.3.241)
+    newrelic_rpm (3.9.4.245)
     nexmo (2.0.0)
     normalize-rails (3.0.1)
     nprogress-rails (0.1.3.1)
@@ -220,6 +237,34 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pry-debugger (0.2.3)
+      debugger (~> 1.3)
+      pry (>= 0.9.10, < 0.11.0)
+    pry-doc (0.6.0)
+      pry (~> 0.9)
+      yard (~> 0.8)
+    pry-docmore (0.1.1)
+      pry
+      pry-doc
+    pry-plus (1.0.0)
+      bond
+      jist
+      pry-debugger
+      pry-doc
+      pry-docmore
+      pry-rescue
+      pry-stack_explorer
+    pry-rails (0.3.2)
+      pry (>= 0.9.10)
+    pry-remote (0.1.8)
+      pry (~> 0.9)
+      slop (~> 3.0)
+    pry-rescue (1.4.1)
+      interception (>= 0.5)
+      pry
+    pry-stack_explorer (0.4.9.1)
+      binding_of_caller (>= 0.7)
+      pry (>= 0.9.11)
     rack (1.5.2)
     rack-contrib (1.1.0)
       rack (>= 0.9.1)
@@ -255,7 +300,7 @@ GEM
       ffi (>= 0.5.0)
     rb-readline (0.5.1)
     rdiscount (1.6.8)
-    rdoc (4.1.1)
+    rdoc (4.1.2)
       json (~> 1.4)
     redcarpet (3.1.2)
     responders (1.0.0)
@@ -286,33 +331,38 @@ GEM
       multi_json (~> 1.0)
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
-    sprockets-rails (2.1.3)
+    sprockets-rails (2.1.4)
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (~> 2.8)
     sqlite3 (1.3.9)
-    swagger-docs (0.1.8)
+    swagger-docs (0.1.9)
+      activesupport (>= 3, < 5)
+      rails (>= 3, < 5)
     swagger-ui_rails (0.1.7)
     thor (0.19.1)
     thread_safe (0.3.4)
     tilt (1.4.1)
-    timers (1.1.0)
+    timers (4.0.1)
+      hitimes
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    turbolinks (2.2.2)
+    turbolinks (2.3.0)
       coffee-rails
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (2.5.3)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
+    unicode-display_width (0.1.1)
     unicorn (4.8.3)
       kgio (~> 2.6)
       rack
       raindrops (~> 0.7)
     warden (1.2.3)
       rack (>= 1.0)
+    yard (0.8.7.4)
 
 PLATFORMS
   ruby
@@ -321,6 +371,7 @@ DEPENDENCIES
   active_admin_import (~> 2.1.1)
   activeadmin!
   activerecord-import (~> 0.5.0)
+  awesome_print
   better_errors (~> 1.1.0)
   binding_of_caller (~> 0.7.2)
   coffee-rails (~> 4.0.0)
@@ -331,6 +382,8 @@ DEPENDENCIES
   guard-livereload
   haml
   haml-rails (~> 0.5.3)
+  hirb
+  hirb-unicode
   htmlcompressor
   httparty (~> 0.13.1)
   jbuilder (~> 2.0)
@@ -347,6 +400,9 @@ DEPENDENCIES
   open_graph_helper (~> 0.2.0)
   pg
   polyamorous!
+  pry-plus
+  pry-rails
+  pry-remote
   rails (= 4.1.4)
   rails-settings-cached (= 0.4.1)
   rails_12factor
