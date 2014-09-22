@@ -1,18 +1,19 @@
 .ui.top.inverted.sidebar.menu.show-on-desktop
   .container
-    - width = (100 / (apps_navigation.count + 1)).to_s + '%'
-    - apps_navigation.each do |app|
-      .app{style: "background-color: #{app['color']}; width : #{width}"}
-        - if app['enabled']
-          %a.item.ui{'title' => app['description'], 'data-content' => app['description'], :href => app['url'], :target => ('_blank' if app['cross_domin'])}
-            - if app['icon'].to_s != ''
-              .icon= image_tag app['icon']
-            .name= app['name']
-        - else
-          %a.item.disabled.ui.has-popup{'title' => 'Coming Soon...', 'data-content' => 'Coming Soon...'}
-            - if app['icon'].to_s != ''
-              .icon= image_tag app['icon']
-            .name= app['name']
+    - if !!apps_navigation
+      - width = (100 / (apps_navigation.count + 1)).to_s + '%'
+      - apps_navigation.each do |app|
+        .app{style: "background-color: #{app['color']}; width : #{width}"}
+          - if app['enabled']
+            %a.item.ui{'title' => app['description'], 'data-content' => app['description'], :href => app['url'], :target => ('_blank' if app['cross_domin'])}
+              - if app['icon'].to_s != ''
+                .icon= image_tag app['icon']
+              .name= app['name']
+          - else
+            %a.item.disabled.ui.has-popup{'title' => 'Coming Soon...', 'data-content' => 'Coming Soon...'}
+              - if app['icon'].to_s != ''
+                .icon= image_tag app['icon']
+              .name= app['name']
     .app.more{style: "width : #{width}"}
       %a.item.ui.has-popup{'data-content' => '更多', :onclick => '$(".apps.sidebar").sidebar("toggle");'}
         .name ⋯
@@ -35,16 +36,17 @@
     %a.item{onclick: '$(".apps.sidebar").sidebar("toggle");'} ⋮
 
 .ui.left.inverted.thin.apps.sidebar.vertical.menu
-  - apps_menu.each do |app|
-    - if app['enabled']
-      %a.item.ui.has-popup{'data-content' => app['description'], :href => app['url'], :target => ('_blank' if app['cross_domin'])}
-        - if app['icon'].to_s != ''
-          / .icon= image_tag app['icon']
-        .name= app['name']
-        .description= app['description']
-    - else
-      %a.item.disabled.ui.has-popup{'data-content' => 'Coming Soon...'}
-        - if app['icon'].to_s != ''
-          / .icon= image_tag app['icon']
-        .name= app['name']
-        .description= app['description']
+  - if !!apps_menu
+    - apps_menu.each do |app|
+      - if app['enabled']
+        %a.item.ui.has-popup{'data-content' => app['description'], :href => app['url'], :target => ('_blank' if app['cross_domin'])}
+          - if app['icon'].to_s != ''
+            / .icon= image_tag app['icon']
+          .name= app['name']
+          .description= app['description']
+      - else
+        %a.item.disabled.ui.has-popup{'data-content' => 'Coming Soon...'}
+          - if app['icon'].to_s != ''
+            / .icon= image_tag app['icon']
+          .name= app['name']
+          .description= app['description']

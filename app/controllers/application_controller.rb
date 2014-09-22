@@ -17,7 +17,16 @@ class ApplicationController < ActionController::Base
   def check_url
     Rails.logger = Rails.application.config.logger if !!Rails.application.config.logger
     if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/)
-      redirect_to(Setting.app_url.gsub(/\/$/, '') + request.fullpath) && return
+      canvas_apps = SiteNavigation.canvas_app.where('url = ?', request.original_url.gsub(/[^:\/]\/.*/) { |s| s.gsub(/\/.*/, '') })
+      if canvas_apps.count > 0
+        @canvas_app = canvas_apps.first
+        set_page_title @canvas_app.canvas_app_title
+        set_page_description @canvas_app.canvas_app_description
+        set_page_image @canvas_app.canvas_app_image
+        render 'pages/canvas_app'
+      else
+        redirect_to(Setting.app_url.gsub(/\/$/, '') + request.fullpath) && return
+      end
     end
   end
 

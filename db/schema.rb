@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140916004506) do
+ActiveRecord::Schema.define(version: 20140922220633) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -165,13 +165,19 @@ ActiveRecord::Schema.define(version: 20140916004506) do
     t.string   "icon"
     t.text     "description"
     t.string   "color"
-    t.integer  "priority",           default: 99999, null: false
-    t.boolean  "show_in_navigation", default: false, null: false
-    t.boolean  "show_in_menu",       default: false, null: false
-    t.boolean  "enabled",            default: false, null: false
+    t.integer  "priority",                    default: 99999, null: false
+    t.boolean  "show_in_navigation",          default: false, null: false
+    t.boolean  "show_in_menu",                default: false, null: false
+    t.boolean  "enabled",                     default: false, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "cross_domin"
+    t.boolean  "canvas_app",                  default: false, null: false
+    t.string   "canvas_app_url"
+    t.string   "canvas_app_title"
+    t.string   "canvas_app_description"
+    t.string   "canvas_app_image"
+    t.string   "canvas_app_background_color"
   end
 
   create_table "user_friendships", force: true do |t|

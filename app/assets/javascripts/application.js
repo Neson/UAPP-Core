@@ -18,6 +18,7 @@
 //= require nprogress
 //= require nprogress-turbolinks
 //= require select2
+//= require iframeResizer
 //
 //= require_tree ./lib/
 //= require_tree ./pages/

@@ -1,0 +1,27 @@
+%iframe#canvas_app_iframe{src: @canvas_app.canvas_app_url, width: '100%', style: 'height: 100vh;'}
+
+:javascript
+  $('#canvas_app_iframe').iFrameResize();
+
+  $('a').each(function() {
+    href = $(this).attr('href')
+    if ((typeof href) == 'string') {
+      href = href.replace(/^\//, '#{Setting.app_url}');
+      $(this).attr('href', href);
+    }
+  });
+
+:css
+  .ui.inverted.menu {
+    background-color: #{@canvas_app.color};
+  }
+
+  body > .wrapper > .main {
+    padding-bottom: 0;
+  }
+
+- if @canvas_app.canvas_app_background_color.to_s != ''
+  :css
+    body > .wrapper {
+      background-color: #{@canvas_app.canvas_app_background_color};
+    }

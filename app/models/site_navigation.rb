@@ -2,6 +2,7 @@ class SiteNavigation < ActiveRecord::Base
   scope :scope_nav, -> { where('show_in_navigation = ?', true).order('priority ASC') }
   scope :scope_menu, -> { where('show_in_menu = ?', true).order('priority ASC') }
   scope :output_data, -> { select([:name, :url, :icon, :description, :color, :priority, :enabled, :cross_domin]).to_a.map { |hash| hash.attributes.select { |k, v| k != 'id' } } }
+  scope :canvas_app, -> { where('canvas_app = ?', true).order('priority ASC') }
 
   after_save :update_cache
 
