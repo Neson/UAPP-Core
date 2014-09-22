@@ -1,10 +1,11 @@
 - count = 0
 - flash.each do |type, message|
-  - count += 1
-  :coffeescript
-    setTimeout ->
-      flash_message.#{type}("#{message}")
-    , #{(count - 1)*1200 + 1}
-  =#.ui.info.message{:class => "#{type}"}
-  =#  %i.close.icon
-  =#  %p= message
+  - if message.class == String
+    - count += 1
+    :javascript
+      setTimeout(function() {
+        return flash_message.#{type}("#{message.gsub(/"/, '\"')}");
+      }, #{(count - 1)*1200 + 1});
+    =#.ui.info.message{:class => "#{type}"}
+    =#  %i.close.icon
+    =#  %p= message
