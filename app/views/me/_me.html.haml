@@ -19,23 +19,38 @@
             %i.ok.sign.icon
   .ui.paper
     .ui.pointing.menu
-      / %a.item{href: dashboard_path, class: "#{'active' if action?('dashboard')}"}
-      /   %i.dashboard.icon
-      /   概覽
-      %a.item{href: information_path, class: "#{'active' if action?('information') || action?('information_update')}"}
-        %i.user.icon
-        個人資料
-      / %a.item{href: notifications_path, class: "#{'active' if action?('notifications')}"}
-      /   %i.mail.icon
-      /   通知
-      / %a.item{href: friends_path, class: "#{'active' if action?('friends')}"}
-      /   %i.users.icon
-      /   好友列表
+      %a.item.hide-on-phone{href: dashboard_path, class: "#{'active' if action?('dashboard')}"}
+        %i.dashboard.icon
+        概覽
+      %a.item{href: data_path, class: "#{'active' if action?('data') || action?('data_update')}"}
+        %i.user.icon.hide-on-extra-small-phone
+        :plain
+          <span class="hide-on-small-phone">帳號</span>資料
+      %a.item.show-on-desktop{href: notifications_path, class: "#{'active' if action?('notifications') || controller?('notifications')}"}
+        %i.mail.icon
+        通知
+      %a.item.show-on-desktop{href: friends_path, class: "#{'active' if action?('friends')}"}
+        %i.users.icon
+        好友列表
       %a.item{href: settings_path, class: "#{'active' if action?('settings') || action?('settings_update')}"}
-        %i.settings.icon
-        帳號設定
+        %i.settings.icon.hide-on-extra-small-phone
+        :plain
+          <span class="hide-on-small-phone">個人</span>設定
       .right.menu
-        .ui.dropdown.item
+        %a.item.hide-on-phone{href: user_path(current_user)}
+          個人頁面
+        .ui.dropdown.item.hide-on-desktop
+          其他
+          %i.dropdown.icon
+          .menu
+            = link_to '概覽', dashboard_path, class: 'item show-on-phone'
+            = link_to '通知', notifications_path, class: 'item'
+            = link_to '好友列表', friends_path, class: 'item'
+            = link_to '個人頁面', user_path(current_user), class: 'item show-on-phone'
+            = link_to '應用程式', oauth_authorized_applications_path, class: 'item'
+            = link_to '開發者', oauth_applications_path, class: 'item'
+            = link_to 'API 文件', api_path, target: '_blank', class: 'item'
+        .ui.dropdown.item.show-on-desktop
           進階
           %i.dropdown.icon
           .menu

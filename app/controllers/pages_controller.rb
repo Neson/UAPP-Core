@@ -1,4 +1,5 @@
 class PagesController < ApplicationController
+  before_filter :set_access_control_allow_headers, only: [:api_docs, :api_docs_json, :api_doc_json]
 
   def api_docs
   end

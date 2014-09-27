@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140922220633) do
+ActiveRecord::Schema.define(version: 20140927214410) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -190,6 +190,17 @@ ActiveRecord::Schema.define(version: 20140922220633) do
   add_index "user_friendships", ["friend_id"], name: "index_user_friendships_on_friend_id", using: :btree
   add_index "user_friendships", ["user_id"], name: "index_user_friendships_on_user_id", using: :btree
 
+  create_table "user_informations", force: true do |t|
+    t.integer  "user_id",                       null: false
+    t.string   "type",       default: "other",  null: false
+    t.string   "name",                          null: false
+    t.string   "value",                         null: false
+    t.integer  "sort",       default: 0,        null: false
+    t.string   "privacy",    default: "public", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "user_rfid_data", force: true do |t|
     t.string   "sid",            null: false
     t.string   "encrypted_code", null: false
@@ -201,12 +212,12 @@ ActiveRecord::Schema.define(version: 20140922220633) do
   add_index "user_rfid_data", ["sid"], name: "index_user_rfid_data_on_sid", unique: true, using: :btree
 
   create_table "users", force: true do |t|
-    t.string   "email",                       default: "",    null: false
-    t.string   "encrypted_password",          default: "",    null: false
+    t.string   "email",                       default: "",       null: false
+    t.string   "encrypted_password",          default: "",       null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",               default: 0,     null: false
+    t.integer  "sign_in_count",               default: 0,        null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
@@ -232,13 +243,18 @@ ActiveRecord::Schema.define(version: 20140922220633) do
     t.string   "address"
     t.text     "brief"
     t.string   "fbtoken"
-    t.integer  "email_confirm_tries",         default: 0,     null: false
+    t.integer  "email_confirm_tries",         default: 0,        null: false
     t.string   "mobile_confirmation_token"
     t.datetime "mobile_confirmation_sent_at"
-    t.integer  "mobile_confirm_tries",        default: 0,     null: false
+    t.integer  "mobile_confirm_tries",        default: 0,        null: false
     t.string   "avatar"
     t.string   "fblink"
     t.string   "fbcover"
+    t.string   "devices"
+    t.string   "school_data_privacy",         default: "public", null: false
+    t.string   "information_privacy",         default: "public", null: false
+    t.string   "username"
+    t.string   "activity_privacy",            default: "public", null: false
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree

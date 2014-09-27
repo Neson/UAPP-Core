@@ -373,6 +373,206 @@ a.ui.step {
 	clear: both;
 }
 
+
+.ui.slider.checkbox .box:after,
+.ui.slider.checkbox label:after {
+  cursor: pointer;
+  display: block;
+  position: absolute;
+  top: -0.1em;
+  left: 0em;
+  z-index: 1;
+  width: 1.2em;
+  height: 1.2em;
+  -webkit-transform: none;
+     -moz-transform: none;
+      -ms-transform: none;
+          transform: none;
+  border-radius: 50rem;
+  -webkit-transition: left 0.3s ease 0s;
+     -moz-transition: left 0.3s ease 0s;
+          transition: left 0.3s ease 0s;
+  background-color: $white !important;
+  margin-left: 0;
+  border: 1px solid rgba(0,0,0, .1);
+  @include box-shadow(0 1px 3px rgba(0,0,0, .32));
+}
+
+.ui.slider.checkbox input:checked ~ .box:after,
+.ui.slider.checkbox input:checked ~ label:after {
+  left: 1.75em;
+}
+
+.ui.slider.checkbox .box:before,
+.ui.slider.checkbox label:before {
+	position: absolute;
+	top: 0.5em;
+	left: 0em;
+	content: '';
+	width: 3em;
+	height: 2px;
+	background-color: rgba(0, 0, 0, 0.1);
+	-webkit-transition: background 0.3s ease 0s,
+	  left 0.3s ease 0s
+	;
+	   -moz-transition: background 0.3s ease 0s,
+	  left 0.3s ease 0s
+	;
+	        transition: background 0.3s ease 0s,
+	  left 0.3s ease 0s
+	;
+}
+
+.ui.slider.checkbox input:checked ~ .box:before,
+.ui.slider.checkbox input:checked ~ label:before {
+  left: 0;
+  background-color: $green;
+}
+
+.ui.toggle.checkbox {
+  cursor: pointer;
+}
+.ui.toggle.checkbox .box,
+.ui.toggle.checkbox label {
+  padding-left: 4em;
+}
+
+.ui.toggle.checkbox .box:before,
+.ui.toggle.checkbox label:before {
+  cursor: pointer;
+  display: block;
+  position: absolute;
+  content: '';
+  top: -0.25em;
+  left: 0em;
+  z-index: 1;
+  background-color: $red !important;
+  width: 3em;
+  height: 1.5em;
+  -webkit-transform: none;
+     -moz-transform: none;
+      -ms-transform: none;
+          transform: none;
+  -webkit-box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.1) inset;
+          box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.1) inset;
+  border-radius: 50rem;
+  @include box-shadow(0 1px 3px rgba(0,0,0, .32) inset);
+}
+
+.ui.toggle.checkbox .box:after,
+.ui.toggle.checkbox label:after {
+  opacity: 1;
+  background-color: transparent;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  content: '';
+  position: absolute;
+  top: -0.25em;
+  left: -0.1em;
+  z-index: 2;
+  border: none;
+  width: 1.5em;
+  height: 1.5em;
+  background-color: $white;
+  border-radius: 50rem;
+  -webkit-transition: background 0.3s ease 0s,
+    left 0.3s ease 0s
+  ;
+     -moz-transition: background 0.3s ease 0s,
+    left 0.3s ease 0s
+  ;
+          transition: background 0.3s ease 0s,
+    left 0.3s ease 0s
+  ;
+  border: 1px solid rgba(0,0,0, .1);
+  @include box-shadow(0 1px 3px rgba(0,0,0, .32));
+  box-sizing: border-box;
+}
+
+.ui.toggle.checkbox input:checked ~ .box:before,
+.ui.toggle.checkbox input:checked ~ label:before {
+  background-color: $green !important;
+}
+
+.ui.toggle.checkbox input:checked ~ .box:after,
+.ui.toggle.checkbox input:checked ~ label:after {
+  left: 1.6em;
+  background-color: $white;
+}
+
+label.hint, .ui.form .field > label.hint {
+	color: rgba(0, 0, 0, 0.5);
+}
+
+
+@include tablet_ {
+
+	.ui.form .two.fields {
+		position: relative;
+
+		.field + .field {
+
+			label.hint {
+				position: absolute;
+				bottom: 28px;
+			}
+		}
+	}
+
+	.ui.form .fields {
+
+		.checkbox {
+			margin-top: 11px;
+			margin-bottom: 11px;
+		}
+	}
+}
+
+@include phone {
+
+	.ui.selection.dropdown {
+		background-color: #fafafa;
+	}
+}
+
+.ui.form {
+
+	.field {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+}
+
+.ui.three.column.grid > .row > .two.wide.column, .ui.three.column.grid > .two.wide.column, .ui.grid > .three.column.row > .two.wide.column {
+	width: 66.666%;
+}
+
+@media only screen and (max-width: 991px) and (min-width: 768px) {
+
+	.ui.three.column.grid > .row > .two.wide.column, .ui.three.column.grid > .two.wide.column, .ui.grid > .three.column.row > .two.wide.column {
+		width: 50%;
+	}
+}
+
+@media only screen and (max-width: 767px) {
+
+	.ui.three.column.grid > .row > .two.wide.column, .ui.three.column.grid > .two.wide.column, .ui.grid > .three.column.row > .two.wide.column {
+		width: 100%;
+	}
+
+	.ui.divided.grid > .column:not(.row), .ui.divided.grid > .row > .column {
+		display: block;
+	}
+
+	.ui.divided.grid > .column:not(.row), .ui.divided.grid > .row > .column {
+		@include box-shadow(none);
+	}
+}
+
 // .ui.steps {
 // 	border-radius: 2px;
 
@@ -494,6 +694,20 @@ body.top.pushed {
 	height: 100px !important;
 	margin-top: -100px !important;
 	position: absolute;
+}
+
+@media screen and (max-width: 320px) {
+
+	.hide-on-extra-small-phone {
+		display: none !important;
+	}
+}
+
+@media screen and (max-width: 380px) {
+
+	.hide-on-small-phone {
+		display: none !important;
+	}
 }
 
 @media screen and (max-width: 767px) {

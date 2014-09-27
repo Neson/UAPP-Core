@@ -77,4 +77,6 @@ $(document).ready(function() {
 
   $('.field_with_errors').parent('.field').addClass('error');
 
+  $('form').bind('submit', function () { NProgress.start(); });
+
 });

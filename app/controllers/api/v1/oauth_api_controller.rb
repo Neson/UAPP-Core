@@ -2,6 +2,7 @@ class Api::V1::OauthApiController < ApplicationController
   include BasicUserApi
   doorkeeper_for :all
   respond_to     :json
+  before_filter :set_access_control_allow_headers
   protect_from_forgery
 
   swagger_controller :users, "OAuth 2.0 User 相關 API"

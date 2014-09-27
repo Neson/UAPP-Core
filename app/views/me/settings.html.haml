@@ -1,12 +1,54 @@
 = render layout: 'me' do
-  = form_tag url: settings_path do
+  = form_for @user, url: settings_path, remote: false do |f|
     %button{:name => "commit", :type => "submit", :value => "commit", :style => "display: none;"}
     .ui.form
-      .ui.left.floated.header 顯示設定
+      .ui.left.floated.header 隱私設定
+      .two.fields
+        .field.has-selection
+          %label 學校資料隱私
+          .ui.fluid.selection.dropdown
+            .text Select
+            %i.dropdown.icon
+            = f.text_field :school_data_privacy, type: :hidden, :autocomplete => :off
+            .menu
+              = options_for_select_to_item_menu data_privacy_options_for_select
+        .field
+          %label.hint 決定誰能看到您的年級、系所
+      .two.fields
+        .field.has-selection
+          %label 個人資料隱私
+          .ui.fluid.selection.dropdown
+            .text Select
+            %i.dropdown.icon
+            = f.text_field :information_privacy, type: :hidden, :autocomplete => :off
+            .menu
+              = options_for_select_to_item_menu data_privacy_options_for_select
+        .field
+          %label.hint 決定誰能看到您在個人頁面上的資料
+      .two.fields
+        .field.has-selection
+          %label 站內活動隱私
+          .ui.fluid.selection.dropdown
+            .text Select
+            %i.dropdown.icon
+            = f.text_field :activity_privacy, type: :hidden, :autocomplete => :off
+            .menu
+              = options_for_select_to_item_menu data_privacy_options_for_select
+        .field
+          %label.hint 決定誰能看到您的站內活動時間軸
       .two.fields
         .field
           .ui.slider.checkbox
-            = check_box_tag 'display_fixed_top_bar', 'yes', !@settings['display_not_fixed_top_bar']
+            = f.check_box :setting_invisible_mode
+            %label 站內隱身
+        .field
+          %label.hint 開啓隱身之後，您在本站的瀏覽都不會留下公開記錄
+
+      .ui.left.floated.header 顯示設定
+      .two.fields
+        .field
+          .ui.toggle.checkbox
+            = f.check_box :setting_display_fixed_top_bar
             %label 固定式上方選單
           %label
         .field

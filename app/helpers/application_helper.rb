@@ -69,6 +69,12 @@ module ApplicationHelper
     image_tag 'https://graph.facebook.com/' + id.to_s + '/picture?width=' + size.to_s + '&height=' + size.to_s
   end
 
+  def get_options_for_select_from_constant_and_locale(constant_name)
+    options_value = Constant.const_get(constant_name.upcase).select { |v| v }
+    options = options_value.map { |v| [I18n.t("#{constant_name.singularize.gsub(/_/, '.')}.#{v}", default: v.gsub(/_/, ' ').split.map(&:capitalize).join(' ')), v] }
+    options_for_select(options)
+  end
+
   def options_for_select_to_item_menu(s)
     s.gsub(/option/, 'div').gsub(/value/, 'class="item" data-value').html_safe
   end

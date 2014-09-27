@@ -1,5 +1,5 @@
 = render layout: 'me' do
-  = form_for @user, url: information_path do |f|
+  = form_for @user, remote: false, url: data_path do |f|
     %button{:name => "commit", :type => "submit", :value => "commit", :style => "display: none;"}
     .ui.form
       .ui.left.floated.header 基本資料
@@ -7,6 +7,10 @@
         .field
           %label 姓名
           = f.text_field :name, :autocomplete => :off
+        .field
+          %label 使用者名稱
+          = f.text_field :username, :autocomplete => :off
+      .two.fields
         .field
           %label 性別
           .ui.fluid.selection.dropdown
@@ -17,7 +21,9 @@
             / %input{:name => "gender", :type => "hidden"}
             .menu
               = options_for_select_to_item_menu gender_options_for_select
+        .field
 
+      .ui.left.floated.header 學校資料
       .two.fields
         .field.readonly.ui.has-popup{"data-content" => "若要更改此欄，請洽詢系統管理者"}
           %label 入學年度

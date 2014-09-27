@@ -1,2 +1,9 @@
 = render layout: 'me' do
-  .content Comming soon
+  .content.friends
+    .ui.items
+      - @friends.each do |friend|
+        %a.item{href: user_path(friend)}
+          .image
+            = image_tag friend.avatar(500)
+          .content
+            .name= friend.name

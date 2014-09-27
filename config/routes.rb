@@ -7,18 +7,18 @@ Rails.application.routes.draw do
     controllers :applications => 'oauth/applications'
   end
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
+  get 'users/login/:id', to: 'users#dev_login'
   match 'users/new', to: 'users#new', via: [:get]
   match 'users/new', to: 'users#new_update', via: [:patch, :put]
-  resources :users, :only => [:show, :edit, :update]
-
+  resources :users, :only => [:index, :show, :update]
   devise_scope :user do
     get '/logout' => "devise/sessions#destroy"
   end
 
   match '/me', to: 'me#dashboard', via: [:get]
   match '/dashboard', to: 'me#dashboard', via: [:get]
-  match '/information', to: 'me#information', via: [:get]
-  match '/information', to: 'me#information_update', via: [:post, :put, :patch]
+  match '/data', to: 'me#data', via: [:get]
+  match '/data', to: 'me#data_update', via: [:post, :put, :patch]
   match '/notifications', to: 'me#notifications', via: [:get]
   match '/friends', to: 'me#friends', via: [:get]
   match '/settings', to: 'me#settings', via: [:get]

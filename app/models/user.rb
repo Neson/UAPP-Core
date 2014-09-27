@@ -4,25 +4,48 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :confirmable, :rememberable, :trackable, :validatable
   devise :omniauthable, :omniauth_providers => [:facebook]
+
   validates_uniqueness_of :fbid
+  validates_uniqueness_of :username, :case_sensitive => false, :allow_blank => true, :allow_nil => true
   validates :name, :gender, :presence => true
-  validates_inclusion_of :identity, :in => ["bachelor", "master", "doctor", "professor", "staff", "other", "guest", nil]
-  validates_inclusion_of :gender, :in => ["male", "female", "other", nil]
+  validates_inclusion_of :identity, :in => Constant::USER_IDENTITY
+  validates_inclusion_of :gender, :in => Constant::USER_GENDERS
+  validates_inclusion_of :information_privacy, :in => Constant::USER_DATA_PRIVACIES
+  validates_inclusion_of :school_data_privacy, :in => Constant::USER_DATA_PRIVACIES
+  validates_inclusion_of :activity_privacy, :in => Constant::USER_DATA_PRIVACIES
+
   scope :confirmed, -> { where("confirmed_at IS NOT NULL") }
   scope :unconfirmed, -> { where("confirmed_at IS NULL") }
 
-  has_many :notifications
-  has_many :friendships, class_name: "UserFriendship"
-  has_many :friends, through: :friendships
-
-  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner
   belongs_to :department, primary_key: "code", foreign_key: "department_code"
   belongs_to :admission_department, class_name: "Department", primary_key: "code", foreign_key: "admission_department_code"
 
+  has_many :notifications
+  validates_associated :notifications
+
+  has_many :informations, class_name: "UserInformation", dependent: :destroy
+  validates_associated :informations
+
+  has_many :friendships, class_name: "UserFriendship", dependent: :destroy
+  has_many :friends, through: :friendships
+
+  has_many :oauth_applications, class_name: 'Doorkeeper::Application', as: :owner
+
+  # Define virtual attributes for user's school avatar
   def avatar(size=100)
     'https://graph.facebook.com/' + fbid.to_s + '/picture?width=' + size.to_s + '&height=' + size.to_s
   end
 
+  # Define virtual attributes for user's mobile_verified
+  def mobile_verified
+    self.mobile?
+  end
+
+  def public_facebook
+    true
+  end
+
+  # Define virtual attributes for user's school data
   def admission_department_name
     admission_department && admission_department.name
   end
@@ -47,6 +70,35 @@ class User < ActiveRecord::Base
     admission_department && admission_department.college && admission_department.college.code
   end
 
+  # Define virtual attributes for user's settings (RailsSettings)
+  Constant::USER_SETTINGS.each do |setting_key|
+
+    define_method("setting_#{setting_key}") do
+      self.settings["#{setting_key}"]
+    end
+
+    define_method("setting_#{setting_key}=") do |argument|
+      argument = true if ['true', '1'].include?(argument.to_s)
+      argument = false if ['false', '0'].include?(argument.to_s)
+      self.settings["#{setting_key}"] = argument
+    end
+
+    if setting_key.match(/not_/)
+      positive_setting_key = setting_key.gsub(/not_/, '')
+
+      define_method("setting_#{positive_setting_key}") do
+        !self.settings["#{setting_key}"]
+      end
+
+      define_method("setting_#{positive_setting_key}=") do |argument|
+        argument = true if ['true', '1'].include?(argument.to_s)
+        argument = false if ['false', '0'].include?(argument.to_s)
+        self.settings["#{setting_key}"] = !argument
+      end
+    end
+  end
+
+  # Define actions that can done to a user
   def send_notification(title, data={})
     # data = {type: nil, content: nil, url: nil, image: nil, sender_application_id: nil, priority: 3, importance: 3, sender: nil, sender_url: nil, icon: nil, event_name: nil, datetime: nil, location: nil}
     data[:title] = title
@@ -57,6 +109,7 @@ class User < ActiveRecord::Base
     self.notifications.new(data).save!
   end
 
+  # Authentication methouds
   def write_login_token_to_cookie(cookies)
     t = Time.now.to_i.to_s
     cookies[:login_token_gtime] = { :expires => 1.year.from_now, value: t, domain: '.' + Setting.app_domain.gsub(/^www./, '') }
@@ -80,6 +133,7 @@ class User < ActiveRecord::Base
     user.fblink = info['link']
     user.fbcover = info['cover'] && info['cover']['source']
     user.avatar = info['picture'] && info['picture']['data'] && info['picture']['data']['url']
+    user.devices = info['devices'].to_s
     user.save
 
     ActiveRecord::Base.transaction do
@@ -97,14 +151,16 @@ class User < ActiveRecord::Base
     return user
   end
 
+  # Get full data, including virtual attributes (virtual_attributes_data)
   def get_data
     data = self.attributes
-    virtual_attributes.each do |attr|
+    virtual_attributes_data.each do |attr|
       data[attr] = self.send(attr)
     end
     return data
   end
 
+  # API actions
   def api_get_data(scopes=[])
     scopes = [] if scopes.to_s == ''
     admin = scopes.include?('admin')
@@ -167,14 +223,13 @@ class User < ActiveRecord::Base
     return {:success => {:message => "Ok", :code => 200}, :status => 200}
   end
 
-  def public_facebook
-    true
-  end
-
   private
 
-  def virtual_attributes
+  # Define virtual_attributes data
+  def virtual_attributes_data
     [
+      "avatar",
+      "mobile_verified",
       "admission_department_name",
       "department_name",
       "college_name",
@@ -184,6 +239,7 @@ class User < ActiveRecord::Base
     ]
   end
 
+  # Define data sets
   def basic_data
     [
       'id',

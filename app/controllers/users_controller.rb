@@ -1,4 +1,55 @@
 class UsersController < ApplicationController
+  before_filter :set_access_control_allow_headers, only: [:show]
+
+  def show
+    @user = User.confirmed.where(id: params[:id]).first
+    redirect_to "/users/#{@user.username}" if @user && !@user.username.blank? && params['format'].to_s != 'json'
+    @user = User.where("lower(username) = ?", params[:id].downcase).first if !@user
+    raise ActionController::RoutingError.new('User Not Found') if !@user
+
+    @relationship = 'none'
+    if current_user
+      if @user.id == current_user.id
+        @relationship = 'me'
+      elsif @user.friends.include?(current_user)
+        @relationship = 'friends'
+      elsif true
+        @relationship = 'school'
+      end
+    end
+
+    @data = []
+    case @user.school_data_privacy
+      when 'public'
+        @data << 'school_data'
+      when 'friends'
+        @data << 'school_data' if @relationship == 'friends'
+      when 'school'
+        @data << 'school_data' if @relationship == 'school'
+      else
+        @data << 'school_data' if @relationship == 'me'
+    end
+    case @user.information_privacy
+      when 'public'
+        @data << 'information'
+      when 'friends'
+        @data << 'information' if @relationship == 'friends'
+      when 'school'
+        @data << 'information' if @relationship == 'school'
+      else
+        @data << 'information' if @relationship == 'me'
+    end
+    case @user.activity_privacy
+      when 'public'
+        @data << 'activity'
+      when 'friends'
+        @data << 'activity' if @relationship == 'friends'
+      when 'school'
+        @data << 'activity' if @relationship == 'school'
+      else
+        @data << 'activity' if @relationship == 'me'
+    end
+  end
 
   def new
     if session["devise.new_user_time"] && session["devise.new_user_time"] > 600.seconds.ago && session["devise.new_user_id"]
@@ -76,6 +127,13 @@ class UsersController < ApplicationController
     else
       flash[:alert] = "session 已過期。"
       redirect_to root_path
+    end
+  end
+
+  def dev_login
+    if Rails.env.development?
+      @user = User.find(params[:id])
+      sign_in_and_redirect @user
     end
   end
 end

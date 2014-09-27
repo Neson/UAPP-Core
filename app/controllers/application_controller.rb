@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
 
   def check_url
     Rails.logger = Rails.application.config.logger if !!Rails.application.config.logger
-    if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/)
+    if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/) && Rails.env.production?
       canvas_apps = SiteNavigation.canvas_app.where('url = ?', request.original_url.gsub(/[^:\/]\/.*/) { |s| s.gsub(/\/.*/, '') })
       if canvas_apps.count > 0
         @canvas_app = canvas_apps.first
@@ -48,6 +48,22 @@ class ApplicationController < ActionController::Base
       current_user.write_login_token_to_cookie(cookies)
     else
       cookies[:login_token] = { value: '', domain: '.' + Setting.app_domain }
+    end
+  end
+
+  def set_access_control_allow_headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
+    headers['Access-Control-Request-Method'] = '*'
+    headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  end
+
+  def block_foreign_request_referrers
+    if !request.referrer.blank?
+      request_referrer_domain = Addressable::URI.parse(request.referrer).host
+      if !!request_referrer_domain.match(/#{Setting.app_domain}$/)
+        render json: {:error => {:message => "Request rejected from URL: #{request.referrer} (not a sub-domain of #{Setting.app_domain}).", :code => 403}, :status => 403}, status: 403
+      end
     end
   end
 end

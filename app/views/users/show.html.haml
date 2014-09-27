@@ -1,0 +1,23 @@
+.container.user.profile{class: ('my' if @user.id == @user.id)}
+  - if @user.fbcover.to_s != ''
+    .background.hide-on-phone
+      = image_tag @user.fbcover
+  .ui.grid.overview
+    .three.wide.column.avator
+      = link_to image_tag(@user.avatar(512)), "https://facebook.com/#{@user.fbid}", target: '_blank'
+    .thirteen.wide.column.info
+      .h1.name= @user.name
+      %p
+        - if @data.include?('school_data')
+          %span #{@user.admission_year} #{@user.department_name}
+      .icons
+        - if @user.fbid
+          .facebook-icon.ui.has-popup{'data-content' => "FB 已認證", 'data-variation' => "inverted"}
+            %a{href: "https://facebook.com/#{@user.fbid}", target: '_blank'}
+              %i.facebook.sign.icon
+        - if @user.mobile?
+          .mobile-verified-icon.ui.has-popup{'data-content' => "手機已認證", 'data-variation' => "inverted"}
+            %i.mobile.icon
+            %i.ok.sign.icon
+  .ui.paper
+    %p Coming Soon ...

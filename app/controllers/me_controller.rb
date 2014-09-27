@@ -4,13 +4,10 @@ class MeController < ApplicationController
   def dashboard
   end
 
-  def information
+  def data
   end
 
-  def information_update
-    t = Time.now.to_i.to_s
-    cookies[:login_update_time] = { value: t, domain: '.' + Setting.app_domain }
-
+  def data_update
     faild = false
 
     if !@user.update(my_params)
@@ -36,17 +33,20 @@ class MeController < ApplicationController
 
     if faild
       flash[:alert] = '儲存失敗。'
-      render :information
+      render :data
     else
       flash[:success] = '儲存成功。'
-      redirect_to information_path
+      redirect_to data_path
     end
+
+    write_update_time_to_cookies()
   end
 
   def notifications
   end
 
   def friends
+    @friends = current_user.friends.confirmed
   end
 
   def settings
@@ -54,17 +54,16 @@ class MeController < ApplicationController
   end
 
   def settings_update
-    t = Time.now.to_i.to_s
-    cookies[:login_update_time] = { value: t, domain: '.' + Setting.app_domain }
 
-    if params['display_fixed_top_bar'].to_s == 'yes'
-      current_user.settings['display_not_fixed_top_bar'] = false
+    if !@user.update(my_params)
+      flash[:alert] = '儲存失敗。'
+      render :settings
     else
-      current_user.settings['display_not_fixed_top_bar'] = true
+      flash[:notice] = '設定已儲存。'
+      redirect_to settings_path
     end
 
-    flash[:notice] = '設定已儲存。'
-    redirect_to settings_path
+    write_update_time_to_cookies()
   end
 
   private
@@ -74,8 +73,13 @@ class MeController < ApplicationController
     @user = User.find(current_user.id)
   end
 
+  def write_update_time_to_cookies
+    t = Time.now.to_i.to_s
+    cookies[:login_update_time] = { value: t, domain: '.' + Setting.app_domain }
+  end
+
   def my_params
-    params.require(:user).permit(:name, :gender, :department_code, :birthday, :address, :brief)
+    params.require(:user).permit([:username, :name, :gender, :department_code, :birthday, :address, :brief, :school_data_privacy, :information_privacy, :activity_privacy].concat(Constant::USER_SETTINGS.map { |s| "setting_#{s}" }).concat(Constant::USER_SETTINGS.map { |s| "setting_#{s}".gsub!(/not_/, '') }))
   end
 
   def send_confirmation_sms

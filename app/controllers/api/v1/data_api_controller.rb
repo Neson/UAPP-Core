@@ -1,5 +1,6 @@
 class Api::V1::DataApiController < ApplicationController
-  respond_to     :json
+  respond_to :json
+  before_filter :set_access_control_allow_headers
   protect_from_forgery
 
   swagger_controller :data, "公開資料集 API"
