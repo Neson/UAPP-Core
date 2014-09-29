@@ -207,8 +207,24 @@ a.ui.step {
 	border-radius: 2px !important;
 }
 
+.ui.selection.dropdown.active {
+
+}
+
+.ui.dropdown .menu .item:hover {
+	background-color: $primary-color !important;
+	color: foreground-color($primary-color) !important;
+	@include transition-property(color, background-color);
+	@include transition-duration(.12s);
+}
+
 .ui.selection.dropdown .menu {
 	border-radius: 0px 0px 2px 2px;
+	@include box-shadow(0px 1px 0px 1px #E0E0E0, 0 12px 12px rgba(0,0,0, .2));
+}
+
+.ui.selection.dropdown:hover .menu {
+	@include box-shadow(0px 1px 0px 1px #D3D3D3, 0 12px 12px rgba(0,0,0, .2));
 }
 
 .ui.form .field :disabled, .ui.form .field.disabled {
