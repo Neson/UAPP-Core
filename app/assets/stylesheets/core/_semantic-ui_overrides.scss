@@ -211,7 +211,7 @@ a.ui.step {
 
 }
 
-.ui.dropdown .menu .item:hover {
+.ui.form .ui.dropdown .menu .item:hover {
 	background-color: $primary-color !important;
 	color: foreground-color($primary-color) !important;
 	@include transition-property(color, background-color);

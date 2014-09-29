@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  before_filter :check_url
+  before_filter :check_url, :set_logger
   before_filter :get_app_setting
   before_action :save_page_history
   after_action :login_control
@@ -15,19 +15,25 @@ class ApplicationController < ActionController::Base
   private
 
   def check_url
-    Rails.logger = Rails.application.config.logger if !!Rails.application.config.logger
-    if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/) && Rails.env.production?
-      canvas_apps = SiteNavigation.canvas_app.where('url = ?', request.original_url.gsub(/[^:\/]\/.*/) { |s| s.gsub(/\/.*/, '') })
-      if canvas_apps.count > 0
-        @canvas_app = canvas_apps.first
-        set_page_title @canvas_app.canvas_app_title
-        set_page_description @canvas_app.canvas_app_description
-        set_page_image @canvas_app.canvas_app_image
-        render 'pages/canvas_app'
-      else
+    if !request.original_url.match(/#{Setting.app_url.gsub(/\/$/, '')}/)
+      @canvas_app = SiteNavigation.canvas_app_with_url(request.original_url.get_domain_from_url).first
+      if !!@canvas_app
+        render_canvas_app
+      elsif Rails.env.production?
         redirect_to(Setting.app_url.gsub(/\/$/, '') + request.fullpath) && return
       end
     end
+  end
+
+  def render_canvas_app
+    set_page_title @canvas_app.canvas_app_title
+    set_page_description @canvas_app.canvas_app_description
+    set_page_image @canvas_app.canvas_app_image
+    render 'pages/canvas_app'
+  end
+
+  def set_logger
+    Rails.logger = Rails.application.config.logger if !!Rails.application.config.logger
   end
 
   def get_app_setting

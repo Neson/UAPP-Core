@@ -1,11 +1,6 @@
-- count = 0
-- flash.each do |type, message|
+- flash.each_with_index do |(type, message), index|
   - if message.class == String
-    - count += 1
     :javascript
       setTimeout(function() {
         return flash_message.#{type}("#{message.gsub(/"/, '\"')}");
-      }, #{(count - 1)*1200 + 1});
-    =#.ui.info.message{:class => "#{type}"}
-    =#  %i.close.icon
-    =#  %p= message
+      }, #{(index - 1)*1200 + 1});

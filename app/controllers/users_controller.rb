@@ -1,59 +1,41 @@
 class UsersController < ApplicationController
   before_filter :set_access_control_allow_headers, only: [:show]
+  before_action :get_user, only: [:show]
+  before_action :get_relationship_and_data_set, only: [:show]
 
-  def show
+  def get_user
     @user = User.confirmed.where(id: params[:id]).first
-    redirect_to "/users/#{@user.username}" if @user && !@user.username.blank? && params['format'].to_s != 'json'
-    @user = User.where("lower(username) = ?", params[:id].downcase).first if !@user
-    raise ActionController::RoutingError.new('User Not Found') if !@user
+  end
 
-    @relationship = 'none'
-    if current_user
-      if @user.id == current_user.id
-        @relationship = 'me'
-      elsif @user.friends.include?(current_user)
-        @relationship = 'friends'
-      elsif true
-        @relationship = 'school'
-      end
-    end
+  def get_relationship_and_data_set
+    @relationship = (!!current_user ? @user.relationship_with(current_user) : 'none')
 
     @data = []
-    case @user.school_data_privacy
-      when 'public'
-        @data << 'school_data'
-      when 'friends'
-        @data << 'school_data' if @relationship == 'friends'
-      when 'school'
-        @data << 'school_data' if @relationship == 'school'
-      else
-        @data << 'school_data' if @relationship == 'me'
+    ['school_data', 'information', 'activity'].each do |privacy_type|
+      case @user["#{privacy_type}_privacy"]
+        when 'public'
+          @data << privacy_type
+        when 'friends'
+          @data << privacy_type if @relationship == 'friends'
+        when 'school'
+          @data << privacy_type if @relationship == 'school'
+        else
+          @data << privacy_type if @relationship == 'me'
+      end
     end
-    case @user.information_privacy
-      when 'public'
-        @data << 'information'
-      when 'friends'
-        @data << 'information' if @relationship == 'friends'
-      when 'school'
-        @data << 'information' if @relationship == 'school'
-      else
-        @data << 'information' if @relationship == 'me'
+  end
+
+  def show
+    if params['format'].to_s != 'json'
+      redirect_to "/users/#{@user.username}" if @user && !@user.username.blank?
     end
-    case @user.activity_privacy
-      when 'public'
-        @data << 'activity'
-      when 'friends'
-        @data << 'activity' if @relationship == 'friends'
-      when 'school'
-        @data << 'activity' if @relationship == 'school'
-      else
-        @data << 'activity' if @relationship == 'me'
-    end
+    @user = User.where("lower(username) = ?", params[:id].downcase).first if !@user
+    raise ActionController::RoutingError.new('User Not Found') if !@user
   end
 
   def new
     if session["devise.new_user_time"] && session["devise.new_user_time"] > 600.seconds.ago && session["devise.new_user_id"]
-      if @user = User.where(confirmed_at: nil, id: session["devise.new_user_id"]).first
+      if @user = User.unconfirmed.where(id: session["devise.new_user_id"]).first
         @user.email = @user.unconfirmed_email if @user.email =~ /@dev\.null$/
       else
         redirect_to root_path

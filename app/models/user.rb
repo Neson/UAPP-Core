@@ -151,6 +151,17 @@ class User < ActiveRecord::Base
     return user
   end
 
+  # Get relationship with another user
+  def relationship_with(user)
+    if self.id == user.id
+      return 'me'
+    elsif self.friends.include?(user)
+      return 'friends'
+    elsif true
+      return 'school'
+    end
+  end
+
   # Get full data, including virtual attributes (virtual_attributes_data)
   def get_data
     data = self.attributes
@@ -176,6 +187,10 @@ class User < ActiveRecord::Base
     data_list = basic_data
     data['uid'] = self.id
     data['mobile_verified'] = self.mobile?
+
+    if scopes.include?('email') || admin
+      data_list.concat email_data
+    end
 
     if scopes.include?('school') || admin
       data['sid'] = self.student_id
@@ -243,9 +258,16 @@ class User < ActiveRecord::Base
   def basic_data
     [
       'id',
+      'username',
       'email',
       'name',
       'gender',
+    ]
+  end
+
+  def email_data
+    [
+      'email',
     ]
   end
 
