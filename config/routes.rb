@@ -8,8 +8,8 @@ Rails.application.routes.draw do
   end
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
   get 'users/login/:id', to: 'users#dev_login'
-  match 'users/new', to: 'users#new', via: [:get]
-  match 'users/new', to: 'users#new_update', via: [:patch, :put]
+  match 'users/new', to: 'user_confirm#new', via: [:get]
+  match 'users/new', to: 'user_confirm#create', via: [:patch, :put]
   resources :users, :only => [:index, :show, :update]
   devise_scope :user do
     get '/logout' => "devise/sessions#destroy"
